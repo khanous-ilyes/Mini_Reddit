@@ -1,0 +1,495 @@
+@page "/create"
+@page "/edit/{PostId:guid}"
+@attribute [Authorize]
+@inject IPostClientService PostService
+@inject IGroupClientService GroupService
+@inject IMediaClientService MediaService
+@inject Client.Services.ITranslationService T
+@inject NavigationManager Nav
+
+<PageTitle>@(isEditing ? T["Create_Title_Edit"] : T["Create_Title_New"]) — KnowledgeHub</PageTitle>
+
+<div class="create-header">
+    <h1>@(isEditing ? T["Create_Title_Edit"] : T["Create_Title_New"])</h1>
+    @if (isEditing) {
+        <button class="btn btn-outline" style="font-size:13px;padding:6px 14px;" @onclick='() => Nav.NavigateTo("/")'>← @T["Action_Cancel"]</button>
+    }
+</div>
+
+@if (loading)
+{
+    <div class="post-card" style="padding:24px;text-align:center;color:var(--text-secondary);">
+        <span class="loader-ring"></span> @T["Create_Message_Loading"]
+    </div>
+}
+else
+{
+    <div class="form-field" style="margin-bottom:16px;">
+        <label>@T["Create_PostCategory"]</label>
+        <div class="type-selector">
+        <button class="type-btn @(selectedType == "SOLUTION" ? "active solution" : "")" @onclick='() => selectedType = "SOLUTION"' disabled="@isEditing">
+            @T["Solution_Badge"]
+        </button>
+        <button class="type-btn @(selectedType == "PROBLEM" ? "active problem" : "")" @onclick='() => selectedType = "PROBLEM"' disabled="@isEditing">
+            @T["Problem_Badge"]
+        </button>
+        <AuthorizeView Roles="SuperAdmin">
+            <Authorized Context="authCtx">
+                <button class="type-btn @(selectedType == "NEWS" ? "active news" : "")" @onclick='() => selectedType = "NEWS"' disabled="@isEditing">
+                    @T["News_Badge"]
+                </button>
+                <button class="type-btn @(selectedType == "QUIZ" ? "active quiz" : "")" @onclick='() => SetType("QUIZ")' disabled="@isEditing">
+                    @T["Quiz_Badge"]
+                </button>
+                <button class="type-btn @(selectedType == "SURVEY" ? "active survey" : "")" @onclick='() => SetType("SURVEY")' disabled="@isEditing">
+                    @T["Survey_Badge"]
+                </button>
+            </Authorized>
+        </AuthorizeView>
+        </div>
+    </div>
+
+    <div class="post-card" style="padding:24px;">
+        <!-- Group -->
+        <div class="form-field">
+            <label>@T["Create_Group"]</label>
+            <select value="@selectedGroupId" @onchange="OnGroupChanged">
+                <option value="">@T["Create_ChooseGroup"]</option>
+                @foreach (var g in groups.Where(g => g.IsJoined)) { 
+                    <option value="@g.Id">@((!string.IsNullOrEmpty(g.IconUrl) && g.IconUrl.StartsWith("data:image")) ? "📁" : g.IconUrl) @g.Name</option> 
+                }
+            </select>
+        </div>
+
+        <!-- Domain -->
+        @if (selectedType == "SOLUTION" && domains.Any())
+        {
+            <div class="form-field">
+                <label style="color:var(--accent-yellow);">@T["Create_Domain"]</label>
+                <select @bind="selectedDomainId">
+                    <option value="">@T["Create_ChooseDomain"]</option>
+                    @foreach (var d in domains) { <option value="@d.Id">@d.Name</option> }
+                </select>
+            </div>
+        }
+        
+        <!-- Title -->
+        <div class="form-field">
+            <label>@T["Create_PostTitle"]</label>
+            <input type="text" @bind="title" placeholder="@T["Create_PostTitlePlaceholder"]" />
+        </div>
+
+        <!-- Dynamic sections based on type -->
+        @if (selectedType == "SOLUTION")
+        {
+            <div class="form-field">
+                <label style="color:var(--accent-pink);">@T["Section_Problem"]</label>
+                <textarea @bind="problemDesc" rows="3" placeholder="@T["Create_Solution_ProbHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+            <div class="form-field">
+                <label style="color:var(--accent-green);">@T["Section_Solution"]</label>
+                <textarea @bind="solutionDesc" rows="5" placeholder="@T["Create_Solution_SolHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+            <div class="form-field">
+                <label style="color:var(--accent-blue);">@T["Section_Result"]</label>
+                <textarea @bind="result" rows="2" placeholder="@T["Create_Solution_ResHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+        }
+        else if (selectedType == "PROBLEM")
+        {
+            <div class="form-field">
+                <label style="color:var(--accent-pink);">@T["Section_Description"]</label>
+                <textarea @bind="problemDesc" rows="5" placeholder="@T["Create_Problem_ProbHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+        }
+        else if (selectedType == "NEWS")
+        {
+            <div class="form-field">
+                <label style="color:var(--accent-blue);">@T["Create_News_ImgLabel"]</label>
+                <div class="news-upload-box">
+                    @if (!string.IsNullOrEmpty(newsImageUrl))
+                    {
+                        <div class="news-preview-wrap">
+                            <img src="@GetImageUrl(newsImageUrl)" class="news-preview" />
+                            <div class="news-preview-overlay">
+                                <button class="btn btn-outline" style="background:rgba(255,255,255,0.1);backdrop-filter:blur(8px);border-color:white;color:white;font-size:12px;" @onclick='() => newsImageUrl = ""'>
+                                    ✕ @T["Action_Cancel"]
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <label class="upload-btn">
+                            <InputFile OnChange="HandleFileSelected" />
+                            <div class="upload-icon">🖼️</div>
+                            <span>@T["Create_News_ImgLabel"]...</span>
+                        </label>
+                    }
+                    @if (uploading)
+                    {
+                        <div class="upload-status">
+                            <span class="loader-ring" style="width:14px;height:14px;border-color:var(--accent-blue);border-bottom-color:transparent;"></span> 
+                            <span>Chargement...</span>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="form-field">
+                <label style="color:var(--text-primary);">@T["Create_News_ContentLabel"]</label>
+                <textarea @bind="newsContent" rows="6" placeholder="@T["Create_News_ContentHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+        }
+        else if (selectedType == "QUIZ" || selectedType == "SURVEY")
+        {
+            <div class="form-field">
+                <label style="color:var(--accent-green);">@(selectedType == "QUIZ" ? T["Create_QuizSurvey_QuizQuestion"] : T["Create_QuizSurvey_SurveyQuestion"])</label>
+                <textarea @bind="quizQuestion" rows="2" placeholder="@T["Create_QuizSurvey_QuestionHolder"]" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+            </div>
+            <div class="form-field">
+                <label>@T["Create_QuizSurvey_OptionsLabel"] (@quizOptionsList.Count)</label>
+                <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:8px;">
+                    @for (int i = 0; i < quizOptionsList.Count; i++)
+                    {
+                        int index = i;
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" @bind="quizOptionsList[index]" placeholder="@T["Create_QuizSurvey_OptionPlaceholder"] @(index+1)" />
+                            @if (quizOptionsList.Count > 2)
+                            {
+                                <button class="btn btn-outline" style="padding:0 12px;color:var(--accent-pink);border-color:var(--accent-pink);" @onclick="() => quizOptionsList.RemoveAt(index)">✕</button>
+                            }
+                        </div>
+                    }
+                </div>
+                <button class="btn btn-outline" style="width:100%; border-style:dashed;" @onclick='() => quizOptionsList.Add("")'>@T["Create_QuizSurvey_AddOption"]</button>
+            </div>
+            @if (selectedType == "QUIZ")
+            {
+                <div class="form-field">
+                    <label style="color:var(--accent-pink);">@(T["Create_QuizSurvey_CorrectIndex"].Replace("{0}", quizOptionsList.Count.ToString()))</label>
+                    <input type="number" @bind="quizCorrectIndex" min="1" max="@quizOptionsList.Count" />
+                </div>
+            }
+        }
+
+        <!-- Hashtags -->
+        <div class="form-field">
+            <label>@T["Create_Hashtags_Label"]</label>
+            <input type="text" @bind="hashtagsInput" placeholder="#dotnet, #blazor, #efcore" />
+        </div>
+
+        <!-- Anonymous toggle -->
+        <div class="anon-toggle">
+            <label class="anon-switch">
+                <input type="checkbox" @bind="isAnonymous" />
+                <span class="anon-slider"></span>
+            </label>
+            <span class="anon-label">@T["Create_Anonymous"]</span>
+        </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="@(success ? "success-bar" : "error-bar")" style="margin-bottom:16px;">@message</div>
+        }
+
+        <button class="btn btn-primary" style="width:100%;margin-top:8px;" @onclick="Submit" disabled="@submitting">
+            @if (submitting) { <span class="loader-ring" style="width:18px;height:18px;border-width:2px;"></span> }
+            else { <span>@(isEditing ? T["Create_Btn_Save"] : T["Create_Btn_Publish"])</span> }
+        </button>
+    </div>
+}
+
+<style>
+    .create-header { margin-bottom: 20px; display:flex; align-items: center; justify-content: space-between; }
+    .create-header h1 { font-size: 22px; font-weight: 700; }
+
+    .type-selector { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .type-btn { flex: 1; min-width: 100px; padding: 12px 8px; background: var(--bg-card); border: 2px solid var(--border); border-radius: var(--radius-md); color: var(--text-secondary); font-weight: 700; font-size: 14px; cursor: pointer; transition: all var(--transition); text-align: center; }
+    .type-btn:disabled { opacity: 0.5; cursor: default; }
+    .type-btn:hover:not(:disabled) { border-color: var(--border-hover); color: var(--text-primary); }
+    .type-btn.active.solution { border-color: var(--accent-green); color: var(--accent-green); background: rgba(70,209,96,0.05); }
+    .type-btn.active.problem { border-color: var(--accent-pink); color: var(--accent-pink); background: rgba(255,88,91,0.05); }
+    .type-btn.active.news { border-color: #3b82f6; color: #3b82f6; background: rgba(59,130,246,0.05); }
+    .type-btn.active.quiz { border-color: #f59e0b; color: #f59e0b; background: rgba(245,158,11,0.05); }
+    .type-btn.active.survey { border-color: #8b5cf6; color: #8b5cf6; background: rgba(139,92,246,0.05); }
+
+    .form-field { margin-bottom: 16px; }
+    .form-field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .form-field input, .form-field textarea, .form-field select {
+        width: 100%; background: var(--bg-input); border: 1px solid var(--border);
+        border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text-primary);
+        font-size: 14px; font-family: var(--font); outline: none; resize: none;
+        overflow: hidden; field-sizing: content;
+    }
+    .form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-color: var(--accent); }
+    .form-field select option { background: var(--bg-body); color: var(--text-primary); }
+
+    .success-bar { background: rgba(70,209,96,0.1); color: var(--accent-green); border: 1px solid rgba(70,209,96,0.3); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; }
+    .error-bar { background: rgba(255,88,91,0.1); color: var(--accent-pink); border: 1px solid rgba(255,88,91,0.3); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 13px; }
+    .anon-toggle{display:flex;align-items:center;gap:10px;margin:12px 0 8px;}
+    .anon-label{font-size:13px;color:var(--text-secondary);font-weight:600;}
+    .anon-switch{position:relative;width:40px;height:22px;display:inline-block;}
+    .anon-switch input{opacity:0;width:0;height:0;}
+    .anon-slider{position:absolute;inset:0;background:var(--border);border-radius:22px;cursor:pointer;transition:.25s;}
+    .anon-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;}
+    .anon-switch input:checked+.anon-slider{background:var(--accent);}
+    .anon-switch input:checked+.anon-slider::before{transform:translateX(18px);}
+
+    /* News Upload */
+    .news-upload-box { margin-top: 8px; background: var(--bg-hover); border: 2px dashed var(--border); border-radius: var(--radius-md); overflow: hidden; transition: all 0.2s; }
+    .news-upload-box:hover:not(:has(.news-preview-wrap)) { border-color: var(--accent-blue); }
+    
+    .upload-btn {
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+        padding: 40px 20px; cursor: pointer; text-align: center;
+    }
+    .upload-btn input { display: none; }
+    .upload-icon { font-size: 32px; filter: grayscale(1); opacity: 0.5; }
+    .upload-btn:hover .upload-icon { filter: none; opacity: 1; transform: scale(1.1); transition: 0.2s; }
+    .upload-btn span { font-size: 14px; color: var(--text-tertiary); font-weight: 600; }
+
+    .news-preview-wrap { position: relative; width: 100%; display: flex; justify-content: center; background: #000; min-height: 200px; }
+    .news-preview { width: 100%; max-height: 400px; object-fit: contain; }
+    .news-preview-overlay { position: absolute; inset:0; background: rgba(0,0,0,0.2); display: flex; align-items: flex-start; justify-content: flex-end; padding: 12px; opacity: 0; transition: 0.2s; }
+    .news-preview-wrap:hover .news-preview-overlay { opacity: 1; }
+    
+    .upload-status { padding: 12px; font-size: 12px; color: var(--accent-blue); display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(59,130,246,0.05); }
+</style>
+
+@code {
+    [Parameter] public Guid? PostId { get; set; }
+    
+    private bool isEditing => PostId.HasValue;
+    private bool loading = false;
+
+    private List<GroupSummaryDto> groups = new();
+    private List<DomainDto> domains = new();
+    private string selectedType = "SOLUTION";
+    private string selectedGroupId = "";
+    private string selectedDomainId = "";
+    private string title = "";
+    private string problemDesc = "", solutionDesc = "", result = "";
+    private string hashtagsInput = "";
+    
+    // News specific
+    private string newsImageUrl = "", newsContent = "";
+    
+    // Quiz/Survey specific
+    private string quizQuestion = "";
+    private List<string> quizOptionsList = new() { "", "" };
+    private int quizCorrectIndex = 1;
+
+    private string message = "";
+    private bool success = false;
+    private bool submitting = false;
+    private bool uploading = false;
+    private bool isAnonymous = false;
+
+    private string GetImageUrl(string url)
+    {
+        if (string.IsNullOrEmpty(url)) return "";
+        if (url.StartsWith("http")) return url;
+        return $"http://localhost:5043{url}";
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file == null) return;
+
+        uploading = true;
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024)); // 5MB limit
+            fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "file", file.Name);
+
+            var res = await MediaService.UploadAsync(content);
+            if (res is { Success: true })
+            {
+                newsImageUrl = res.Url!;
+            }
+            else
+            {
+                message = res?.Message ?? "Upload failed";
+                success = false;
+            }
+        }
+        catch (Exception ex)
+        {
+            message = "Error: " + ex.Message;
+            success = false;
+        }
+        finally
+        {
+            uploading = false;
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        groups = (await GroupService.GetGroupsAsync()).ToList();
+
+        if (isEditing && PostId.HasValue)
+        {
+            loading = true;
+            var res = await PostService.GetPostDetailAsync(PostId.Value);
+            loading = false;
+
+            if (res?.Data != null)
+            {
+                var post = res.Data;
+                selectedType = post.TypeCode;
+                title = post.Title;
+                selectedGroupId = post.GroupId.ToString();
+                selectedDomainId = post.DomainId?.ToString() ?? "";
+                hashtagsInput = string.Join(", ", post.Hashtags);
+
+                // Load domains for the selected group
+                if (Guid.TryParse(selectedGroupId, out var gid))
+                {
+                    domains = (await GroupService.GetDomainsAsync(gid)).ToList();
+                }
+
+                // Prefill sections
+                if (selectedType == "SOLUTION")
+                {
+                    post.Sections.TryGetValue("PROBLEM_DESC", out problemDesc!);
+                    post.Sections.TryGetValue("SOLUTION_DESC", out solutionDesc!);
+                    post.Sections.TryGetValue("RESULT", out result!);
+                }
+                else if (selectedType == "PROBLEM")
+                {
+                    post.Sections.TryGetValue("PROBLEM_DESC", out problemDesc!);
+                }
+                else if (selectedType == "NEWS")
+                {
+                    post.Sections.TryGetValue("CONTEXT", out newsImageUrl!);
+                    post.Sections.TryGetValue("CONTENT", out newsContent!);
+                }
+                else if (selectedType is "QUIZ" or "SURVEY")
+                {
+                    if (post.Sections.TryGetValue("CONTENT", out var contentJson))
+                    {
+                        try
+                        {
+                            var p = System.Text.Json.JsonSerializer.Deserialize<QuizPayloadHelper>(contentJson);
+                            if (p != null)
+                            {
+                                quizQuestion = p.question;
+                                quizOptionsList = p.options?.ToList() ?? new();
+                                quizCorrectIndex = p.correctIndex + 1;
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+    }
+    
+    private void SetType(string type)
+    {
+        selectedType = type;
+        if (type == "SURVEY") quizOptionsList = new List<string> { "Oui", "Non" };
+        else if (type == "QUIZ") quizOptionsList = new List<string> { "", "" };
+    }
+
+    private async Task OnGroupChanged(ChangeEventArgs e)
+    {
+        selectedGroupId = e.Value?.ToString() ?? "";
+        selectedDomainId = "";
+        domains.Clear();
+        if (!string.IsNullOrEmpty(selectedGroupId) && Guid.TryParse(selectedGroupId, out var gid))
+        {
+            domains = (await GroupService.GetDomainsAsync(gid)).ToList();
+        }
+        StateHasChanged();
+    }
+
+    private async Task Submit()
+    {
+        message = "";
+        if (!isEditing && string.IsNullOrWhiteSpace(selectedGroupId)) { message = T["Create_Message_ErrGroup"]; success = false; return; }
+        if (string.IsNullOrWhiteSpace(title)) { message = T["Create_Message_ErrTitle"]; success = false; return; }
+        
+        if (selectedType is "SOLUTION" or "PROBLEM")
+            if (string.IsNullOrWhiteSpace(problemDesc)) { message = T["Create_Message_ErrDesc"]; success = false; return; }
+        if (selectedType == "NEWS")
+            if (string.IsNullOrWhiteSpace(newsContent)) { message = T["Create_Message_ErrNews"]; success = false; return; }
+        if (selectedType is "QUIZ" or "SURVEY")
+        {
+            if (string.IsNullOrWhiteSpace(quizQuestion)) { message = T["Create_Message_ErrQuestion"]; success = false; return; }
+            if (quizOptionsList.Any(o => string.IsNullOrWhiteSpace(o))) { message = T["Create_Message_ErrOptions"]; success = false; return; }
+        }
+
+        submitting = true; StateHasChanged();
+
+        var sections = BuildSections();
+        var hashtags = hashtagsInput.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(h => h.Trim()).Where(h => !string.IsNullOrEmpty(h)).ToList();
+
+        var dto = new CreatePostDto
+        {
+            TypeCode = selectedType,
+            GroupId = Guid.Parse(selectedGroupId),
+            DomainId = string.IsNullOrEmpty(selectedDomainId) ? null : Guid.Parse(selectedDomainId),
+            Title = title,
+            Sections = sections,
+            Hashtags = hashtags,
+            IsAnonymous = isAnonymous
+        };
+
+        try
+        {
+            if (isEditing && PostId.HasValue)
+            {
+                var res = await PostService.UpdatePostAsync(PostId.Value, dto);
+                if (res is { Success: true }) { message = T["Create_Message_SuccessUpdate"]; success = true; Nav.NavigateTo($"/"); }
+                else { message = res?.Message ?? T["Create_Message_ErrUpdate"]; success = false; }
+            }
+            else
+            {
+                var res = await PostService.CreatePostAsync(dto);
+                if (res is { Success: true }) Nav.NavigateTo("/");
+                else { message = res?.Message ?? T["Create_Message_ErrPublish"]; success = false; }
+            }
+        }
+        catch { message = T["Create_Message_ErrNetwork"]; success = false; }
+        finally { submitting = false; }
+    }
+
+    private Dictionary<string, string> BuildSections()
+    {
+        var sections = new Dictionary<string, string>();
+        if (selectedType == "SOLUTION")
+        {
+            if (!string.IsNullOrWhiteSpace(problemDesc)) sections["PROBLEM_DESC"] = problemDesc;
+            if (!string.IsNullOrWhiteSpace(solutionDesc)) sections["SOLUTION_DESC"] = solutionDesc;
+            if (!string.IsNullOrWhiteSpace(result)) sections["RESULT"] = result;
+        }
+        else if (selectedType == "PROBLEM")
+        {
+            if (!string.IsNullOrWhiteSpace(problemDesc)) sections["PROBLEM_DESC"] = problemDesc;
+        }
+        else if (selectedType == "NEWS")
+        {
+            if (!string.IsNullOrWhiteSpace(newsImageUrl)) sections["CONTEXT"] = newsImageUrl;
+            if (!string.IsNullOrWhiteSpace(newsContent)) sections["CONTENT"] = newsContent;
+        }
+        else if (selectedType is "QUIZ" or "SURVEY")
+        {
+            var payload = new { question = quizQuestion, options = quizOptionsList.ToArray(), correctIndex = selectedType == "QUIZ" ? quizCorrectIndex - 1 : -1 };
+            sections["CONTENT"] = System.Text.Json.JsonSerializer.Serialize(payload);
+        }
+        return sections;
+    }
+
+    private class QuizPayloadHelper
+    {
+        public string question { get; set; } = "";
+        public string[]? options { get; set; }
+        public int correctIndex { get; set; }
+    }
+}

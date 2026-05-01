@@ -1,0 +1,184 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ilyas\\Desktop\\OurProject\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4355391B-DC9A-4B22-85F7-2A6C37F08D07}|ServerLibrary\\ServerLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\serverlibrary\\services\\implementations\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4355391B-DC9A-4B22-85F7-2A6C37F08D07}|ServerLibrary\\ServerLibrary.csproj|solutionrelative:serverlibrary\\services\\implementations\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\baselibrary\\dtos\\userprofiledto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|solutionrelative:baselibrary\\dtos\\userprofiledto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\baselibrary\\entities\\posts\\postmedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|solutionrelative:baselibrary\\entities\\posts\\postmedia.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\baselibrary\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|solutionrelative:baselibrary\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\baselibrary\\entities\\survey\\surveyvote.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BED8F616-2F87-4E9E-BCA0-AA580C4998AF}|BaseLibrary\\BaseLibrary.csproj|solutionrelative:baselibrary\\entities\\survey\\surveyvote.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{201D6BBC-C578-4EB7-BDF8-0E89AA0B2C1C}|ClientLibrary\\ClientLibrary.csproj|c:\\users\\ilyas\\desktop\\ourproject\\clientlibrary\\services\\implementations\\groupclientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{201D6BBC-C578-4EB7-BDF8-0E89AA0B2C1C}|ClientLibrary\\ClientLibrary.csproj|solutionrelative:clientlibrary\\services\\implementations\\groupclientservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2809D454-106F-46D5-8F33-6278810E6EAD}|Server\\Server.csproj|c:\\users\\ilyas\\desktop\\ourproject\\server\\controllers\\commentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2809D454-106F-46D5-8F33-6278810E6EAD}|Server\\Server.csproj|solutionrelative:server\\controllers\\commentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2809D454-106F-46D5-8F33-6278810E6EAD}|Server\\Server.csproj|c:\\users\\ilyas\\desktop\\ourproject\\server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2809D454-106F-46D5-8F33-6278810E6EAD}|Server\\Server.csproj|solutionrelative:server\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\ServerLibrary\\Services\\Implementations\\AuthService.cs",
+              "RelativeDocumentMoniker": "ServerLibrary\\Services\\Implementations\\AuthService.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\ServerLibrary\\Services\\Implementations\\AuthService.cs",
+              "RelativeToolTip": "ServerLibrary\\Services\\Implementations\\AuthService.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAnwCAAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:44.401Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UserProfileDto.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\DTOs\\UserProfileDto.cs",
+              "RelativeDocumentMoniker": "BaseLibrary\\DTOs\\UserProfileDto.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\DTOs\\UserProfileDto.cs",
+              "RelativeToolTip": "BaseLibrary\\DTOs\\UserProfileDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:41.676Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PostMedia.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Entities\\Posts\\PostMedia.cs",
+              "RelativeDocumentMoniker": "BaseLibrary\\Entities\\Posts\\PostMedia.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Entities\\Posts\\PostMedia.cs",
+              "RelativeToolTip": "BaseLibrary\\Entities\\Posts\\PostMedia.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:39.749Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Class1.cs",
+              "RelativeDocumentMoniker": "BaseLibrary\\Class1.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Class1.cs",
+              "RelativeToolTip": "BaseLibrary\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:38.235Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SurveyVote.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Entities\\Survey\\SurveyVote.cs",
+              "RelativeDocumentMoniker": "BaseLibrary\\Entities\\Survey\\SurveyVote.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\BaseLibrary\\Entities\\Survey\\SurveyVote.cs",
+              "RelativeToolTip": "BaseLibrary\\Entities\\Survey\\SurveyVote.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:36.829Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GroupClientService.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\ClientLibrary\\Services\\Implementations\\GroupClientService.cs",
+              "RelativeDocumentMoniker": "ClientLibrary\\Services\\Implementations\\GroupClientService.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\ClientLibrary\\Services\\Implementations\\GroupClientService.cs",
+              "RelativeToolTip": "ClientLibrary\\Services\\Implementations\\GroupClientService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:35.957Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CommentsController.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\Server\\Controllers\\CommentsController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\CommentsController.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\Server\\Controllers\\CommentsController.cs",
+              "RelativeToolTip": "Server\\Controllers\\CommentsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:34.861Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\ilyas\\Desktop\\OurProject\\Server\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "Server\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\ilyas\\Desktop\\OurProject\\Server\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "Server\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-28T10:17:32.457Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+@page "/groups"
+@attribute [Authorize]
+@inject IGroupClientService GroupService
+@inject Client.Services.ITranslationService T
+
+<PageTitle>@T["GroupList_Title"]</PageTitle>
+
+<div style="margin-bottom:24px;">
+    <h1 style="font-size:24px;font-weight:700;">@T["GroupList_Header"]</h1>
+    <p style="color:var(--text-secondary);font-size:14px;margin-top:6px;">@T["GroupList_Subtitle"]</p>
+</div>
+
+@if (isLoading)
+{
+    <div class="loading-wrap"><div class="loader-ring"></div></div>
+}
+else
+{
+    <div class="group-grid">
+        @foreach (var g in groups)
+        {
+            <div class="post-card group-card">
+                <a href="/groups/@g.Id" style="text-decoration:none; color:inherit; text-align:center;">
+                    <div class="group-icon">
+                        @if(!string.IsNullOrEmpty(g.IconUrl) && g.IconUrl.StartsWith("data:image"))
+                        {
+                            <img src="@g.IconUrl" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            @(string.IsNullOrEmpty(g.IconUrl) ? "📂" : g.IconUrl)
+                        }
+                    </div>
+                    <h3 class="group-name">@g.Name</h3>
+                    <p class="group-desc">@g.Description</p>
+                </a>
+                <div class="group-meta">@g.MemberCount @(g.MemberCount > 1 ? T["GroupList_Members"] : T["GroupList_Member"])</div>
+                
+                @if (g.IsJoined)
+                {
+                    <button class="btn btn-outline" style="width:100%;margin-top:auto;" @onclick="() => ToggleJoin(g)">@T["GroupList_BtnLeave"]</button>
+                }
+                else
+                {
+                    <button class="btn btn-primary" style="width:100%;margin-top:auto;" @onclick="() => ToggleJoin(g)">@T["GroupList_BtnJoin"]</button>
+                }
+            </div>
+        }
+    </div>
+}
+
+<style>
+    .group-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+    }
+    
+    .group-card {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        /* Equal height cards, pushing button to bottom via margin-top:auto */
+        height: 100%; 
+    }
+    
+    .group-icon {
+        font-size: 42px;
+        margin-bottom: 12px;
+    }
+    
+    .group-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+    }
+    
+    .group-desc {
+        font-size: 13px;
+        color: var(--text-secondary);
+        margin-bottom: 12px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .group-meta {
+        font-size: 11px;
+        color: var(--text-tertiary);
+        font-weight: 600;
+        margin-bottom: 16px;
+        padding: 4px 8px;
+        background: var(--bg-body);
+        border-radius: var(--radius-sm);
+    }
+</style>
+
+@code {
+    private List<GroupSummaryDto> groups = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGroups();
+    }
+
+    private async Task LoadGroups()
+    {
+        groups = (await GroupService.GetGroupsAsync()).ToList();
+        isLoading = false;
+    }
+
+    private async Task ToggleJoin(GroupSummaryDto g)
+    {
+        if (g.IsJoined)
+        {
+            var res = await GroupService.LeaveGroupAsync(g.Id);
+            if (res is { Success: true }) { g.IsJoined = false; g.MemberCount--; }
+        }
+        else
+        {
+            var res = await GroupService.JoinGroupAsync(g.Id);
+            if (res is { Success: true }) { g.IsJoined = true; g.MemberCount++; }
+        }
+    }
+}

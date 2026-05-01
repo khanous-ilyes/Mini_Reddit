@@ -1,0 +1,19 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  BaseLibrary -> C:\Users\ilyas\Desktop\OurProject\BaseLibrary\bin\Debug\net8.0\BaseLibrary.dll
+  ClientLibrary -> C:\Users\ilyas\Desktop\OurProject\ClientLibrary\bin\Debug\net8.0\ClientLibrary.dll
+C:\Users\ilyas\Desktop\OurProject\Client\Layout\MainLayout.razor(43,115): error CS4034: The 'await' operator can only be used within an async lambda expression. Consider marking this lambda expression with the 'async' modifier. [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+C:\Users\ilyas\Desktop\OurProject\Client\obj\Debug\net9.0\Microsoft.CodeAnalysis.Razor.Compiler\Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator\Layout_MainLayout_razor.g.cs(267,199): error CS1662: Cannot convert lambda expression to intended delegate type because some of the return types in the block are not implicitly convertible to the delegate return type [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+C:\Users\ilyas\Desktop\OurProject\Client\Pages\Groups\GroupDetail.razor(141,24): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+
+Build FAILED.
+
+C:\Users\ilyas\Desktop\OurProject\Client\Pages\Groups\GroupDetail.razor(141,24): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread. [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+C:\Users\ilyas\Desktop\OurProject\Client\Layout\MainLayout.razor(43,115): error CS4034: The 'await' operator can only be used within an async lambda expression. Consider marking this lambda expression with the 'async' modifier. [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+C:\Users\ilyas\Desktop\OurProject\Client\obj\Debug\net9.0\Microsoft.CodeAnalysis.Razor.Compiler\Microsoft.NET.Sdk.Razor.SourceGenerators.RazorSourceGenerator\Layout_MainLayout_razor.g.cs(267,199): error CS1662: Cannot convert lambda expression to intended delegate type because some of the return types in the block are not implicitly convertible to the delegate return type [C:\Users\ilyas\Desktop\OurProject\Client\Client.csproj]
+    1 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:01.21
+
+Workload updates are available. Run `dotnet workload list` for more information.

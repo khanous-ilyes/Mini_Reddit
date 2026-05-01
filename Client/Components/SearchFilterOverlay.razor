@@ -1,0 +1,332 @@
+@namespace Client.Components
+@using BaseLibrary.DTOs.Posts
+@using BaseLibrary.DTOs.Groups
+@inject ClientLibrary.Services.Implementations.IPostClientService PostService
+@inject ClientLibrary.Services.Implementations.IGroupClientService GroupService
+@inject Client.Services.SearchStateService SearchState
+@inject Client.Services.ITranslationService T
+@inject NavigationManager Nav
+
+@if (IsOpen)
+{
+    <div class="sf-backdrop" @onclick="Close"></div>
+    <div class="sf-overlay">
+        <!-- Header -->
+        <div class="sf-header">
+            <div class="sf-header-icon">🔍</div>
+            <h2 class="sf-title">@T["Search_Title"]</h2>
+            <button class="sf-close" @onclick="Close">&times;</button>
+        </div>
+
+        <!-- Keyword -->
+        <div class="sf-field full-width">
+            <input type="text" class="sf-input sf-keyword" placeholder="@T["Search_Keyword"]" @bind="filter.Keyword" @bind:event="oninput" />
+        </div>
+
+        <!-- Filters Grid -->
+        <div class="sf-grid">
+            <!-- Post Type -->
+            <div class="sf-field">
+                <label class="sf-label">📝 @T["Search_PostType"]</label>
+                <select class="sf-select" @bind="filter.TypeCode">
+                    <option value="">@T["Search_All"]</option>
+                    <option value="SOLUTION">💡 Solution</option>
+                    <option value="PROBLEM">❓ Problem</option>
+                    <option value="NEWS">📰 News</option>
+                    <option value="QUIZ">🎯 Quiz</option>
+                    <option value="SURVEY">📊 Survey</option>
+                </select>
+            </div>
+
+            <!-- Group -->
+            <div class="sf-field">
+                <label class="sf-label">📂 @T["Search_Group"]</label>
+                <select class="sf-select" @bind="selectedGroupId">
+                    <option value="">@T["Search_All"]</option>
+                    @foreach (var g in groups)
+                    {
+                        <option value="@g.Id">@g.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Domain -->
+            <div class="sf-field">
+                <label class="sf-label">🌐 @T["Search_Domain"]</label>
+                <select class="sf-select" @bind="selectedDomainId">
+                    <option value="">@T["Search_All"]</option>
+                    @foreach (var d in domains)
+                    {
+                        <option value="@d.Id">@d.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Author -->
+            <div class="sf-field">
+                <label class="sf-label">👤 @T["Search_Author"]</label>
+                <input type="text" class="sf-input" placeholder="@T["Search_AuthorPlaceholder"]" @bind="filter.AuthorId" />
+            </div>
+
+            <!-- Date Range -->
+            <div class="sf-field">
+                <label class="sf-label">📅 @T["Search_DateFrom"]</label>
+                <input type="date" class="sf-input" @bind="filter.DateFrom" />
+            </div>
+            <div class="sf-field">
+                <label class="sf-label">📅 @T["Search_DateTo"]</label>
+                <input type="date" class="sf-input" @bind="filter.DateTo" />
+            </div>
+
+            <!-- Rating Range -->
+            <div class="sf-field">
+                <label class="sf-label">⭐ @T["Search_RatingMin"]</label>
+                <input type="number" class="sf-input" min="0" max="5" step="0.5" placeholder="0" @bind="filter.RatingMin" />
+            </div>
+            <div class="sf-field">
+                <label class="sf-label">⭐ @T["Search_RatingMax"]</label>
+                <input type="number" class="sf-input" min="0" max="5" step="0.5" placeholder="5" @bind="filter.RatingMax" />
+            </div>
+
+            <!-- Views Range -->
+            <div class="sf-field">
+                <label class="sf-label">👁️ @T["Search_ViewsMin"]</label>
+                <input type="number" class="sf-input" min="0" placeholder="0" @bind="filter.ViewsMin" />
+            </div>
+            <div class="sf-field">
+                <label class="sf-label">👁️ @T["Search_ViewsMax"]</label>
+                <input type="number" class="sf-input" min="0" placeholder="∞" @bind="filter.ViewsMax" />
+            </div>
+
+            <!-- Hashtag -->
+            <div class="sf-field" style="grid-column:span 2;">
+                <label class="sf-label">🏷️ @T["Search_Hashtag"]</label>
+                <input type="text" class="sf-input" placeholder="#dotnet, #security..." @bind="filter.Hashtag" />
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="sf-actions">
+            <button class="sf-btn sf-btn-reset" @onclick="ResetFilters">
+                🔄 @T["Search_Reset"]
+            </button>
+            <button class="sf-btn sf-btn-search" disabled="@searching" @onclick="ExecuteSearch">
+                @(searching ? "⏳..." : $"🚀 {T["Search_Execute"]}")
+            </button>
+        </div>
+
+        <!-- Active Filters Chips -->
+        @if (activeFilterCount > 0)
+        {
+            <div class="sf-chips">
+                <span class="sf-chip-label">@T["Search_ActiveFilters"]: @activeFilterCount</span>
+            </div>
+        }
+
+    </div>
+}
+
+<style>
+    /* Backdrop */
+    .sf-backdrop {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+        z-index: 9998; animation: sfFadeIn 0.2s ease;
+    }
+
+    /* Overlay Panel */
+    .sf-overlay {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 90vw; max-width: 720px; max-height: 85vh; overflow-y: auto;
+        background: var(--bg-elevated); border: 1px solid var(--border);
+        border-radius: 20px; padding: 28px; z-index: 9999;
+        box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 120px rgba(255,69,0,0.08);
+        animation: sfSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @@keyframes sfFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @@keyframes sfSlideIn { from { opacity: 0; transform: translate(-50%, -48%) scale(0.96); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+
+    /* Header */
+    .sf-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .sf-header-icon { font-size: 28px; }
+    .sf-title { font-size: 20px; font-weight: 800; color: var(--text-primary); flex: 1; margin: 0; }
+    .sf-close {
+        width: 36px; height: 36px; border-radius: 50%; border: none; font-size: 20px;
+        background: var(--bg-hover); color: var(--text-secondary); cursor: pointer;
+        display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+    }
+    .sf-close:hover { background: var(--accent-pink); color: white; }
+
+    /* Keyword */
+    .sf-keyword {
+        font-size: 16px !important; padding: 14px 20px !important; border-radius: 14px !important;
+        background: var(--bg-hover) !important; border: 2px solid var(--border) !important;
+        transition: border-color 0.2s !important;
+    }
+    .sf-keyword:focus { border-color: var(--accent) !important; outline: none; box-shadow: 0 0 0 3px rgba(255,69,0,0.15); }
+
+    /* Grid */
+    .sf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+    .sf-field { display: flex; flex-direction: column; gap: 4px; }
+    .sf-field.full-width { grid-column: span 2; }
+    .sf-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sf-input, .sf-select {
+        width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+        background: var(--bg-hover); color: var(--text-primary); font-size: 13px; transition: all 0.15s;
+        box-sizing: border-box;
+    }
+    .sf-input:focus, .sf-select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 2px rgba(255,69,0,0.1); }
+    .sf-select { cursor: pointer; appearance: none; }
+
+    /* Actions */
+    .sf-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .sf-btn {
+        flex: 1; padding: 12px 20px; border-radius: 12px; border: none; font-size: 14px; font-weight: 700;
+        cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .sf-btn-reset { background: var(--bg-hover); color: var(--text-secondary); }
+    .sf-btn-reset:hover { background: var(--border); }
+    .sf-btn-search {
+        background: linear-gradient(135deg, #FF4500, #FF6B35); color: white;
+        box-shadow: 0 4px 16px rgba(255,69,0,0.3);
+    }
+    .sf-btn-search:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,69,0,0.4); }
+    .sf-btn-search:disabled { opacity: 0.7; cursor: wait; transform: none; }
+
+    /* Chips */
+    .sf-chips { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .sf-chip-label { font-size: 12px; font-weight: 700; color: var(--accent); background: rgba(255,69,0,0.1); padding: 4px 12px; border-radius: 20px; }
+
+    /* Results */
+    .sf-results { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 16px; }
+    .sf-results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .sf-results-count { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+    .sf-results-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .sf-result-item {
+        display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px;
+        background: var(--bg-hover); cursor: pointer; transition: all 0.15s; text-decoration: none; color: inherit;
+        border: 1px solid transparent;
+    }
+    .sf-result-item:hover { border-color: var(--accent); transform: translateX(4px); }
+    .sf-result-badge { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sf-result-badge.badge-solution { background: rgba(76,175,80,0.15); }
+    .sf-result-badge.badge-problem { background: rgba(244,67,54,0.15); }
+    .sf-result-badge.badge-news { background: rgba(33,150,243,0.15); }
+    .sf-result-badge.badge-quiz { background: rgba(255,152,0,0.15); }
+    .sf-result-badge.badge-survey { background: rgba(156,39,176,0.15); }
+    .sf-result-info { flex: 1; min-width: 0; }
+    .sf-result-title { font-size: 14px; font-weight: 700; color: var(--text-primary); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sf-result-meta { display: flex; gap: 12px; font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+    .sf-empty { text-align: center; padding: 32px; color: var(--text-secondary); }
+    .sf-empty p { margin-top: 8px; font-size: 14px; }
+
+    @@media (max-width: 600px) {
+        .sf-grid { grid-template-columns: 1fr; }
+        .sf-field.full-width, .sf-field[style*="grid-column"] { grid-column: span 1; }
+        .sf-overlay { width: 95vw; padding: 20px; }
+    }
+</style>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private SearchFilterDto filter = new();
+    private List<GroupSummaryDto> groups = new();
+    private List<DomainDto> domains = new();
+    private bool searching = false;
+    private string selectedGroupId = "";
+    private string selectedDomainId = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (IsOpen && !groups.Any())
+        {
+            var gEnum = await GroupService.GetGroupsAsync();
+            groups = gEnum?.ToList() ?? new List<GroupSummaryDto>();
+            // Load all domains from all groups
+            var allDomains = new List<DomainDto>();
+            foreach (var g in groups)
+            {
+                var gDomains = await GroupService.GetDomainsAsync(g.Id);
+                if (gDomains != null)
+                    allDomains.AddRange(gDomains);
+            }
+            domains = allDomains.GroupBy(d => d.Id).Select(grp => grp.First()).ToList();
+        }
+    }
+
+    private int activeFilterCount
+    {
+        get
+        {
+            int count = 0;
+            if (!string.IsNullOrWhiteSpace(filter.Keyword)) count++;
+            if (!string.IsNullOrWhiteSpace(filter.AuthorId)) count++;
+            if (!string.IsNullOrEmpty(selectedGroupId)) count++;
+            if (!string.IsNullOrEmpty(selectedDomainId)) count++;
+            if (!string.IsNullOrWhiteSpace(filter.TypeCode)) count++;
+            if (filter.DateFrom.HasValue) count++;
+            if (filter.DateTo.HasValue) count++;
+            if (filter.RatingMin.HasValue) count++;
+            if (filter.RatingMax.HasValue) count++;
+            if (filter.ViewsMin.HasValue) count++;
+            if (filter.ViewsMax.HasValue) count++;
+            if (!string.IsNullOrWhiteSpace(filter.Hashtag)) count++;
+            return count;
+        }
+    }
+
+    private void ExecuteSearch()
+    {
+        searching = true;
+        
+        // Apply group/domain GUIDs
+        filter.GroupId = Guid.TryParse(selectedGroupId, out var gid) ? gid : null;
+        filter.DomainId = Guid.TryParse(selectedDomainId, out var did) ? did : null;
+
+        SearchState.ApplyFilter(filter);
+        
+        searching = false;
+        Close();
+        
+        // Redirect to Home if not already there
+        if (new Uri(Nav.Uri).AbsolutePath != "/")
+        {
+            Nav.NavigateTo("/");
+        }
+    }
+
+    private void ResetFilters()
+    {
+        filter = new();
+        selectedGroupId = "";
+        selectedDomainId = "";
+        SearchState.ClearFilter();
+    }
+
+    private void Close()
+    {
+        OnClose.InvokeAsync();
+    }
+
+    private string GetBadgeClass(string typeCode) => typeCode switch
+    {
+        "SOLUTION" => "badge-solution",
+        "PROBLEM" => "badge-problem",
+        "NEWS" => "badge-news",
+        "QUIZ" => "badge-quiz",
+        "SURVEY" => "badge-survey",
+        _ => ""
+    };
+
+    private string GetBadgeIcon(string typeCode) => typeCode switch
+    {
+        "SOLUTION" => "💡",
+        "PROBLEM" => "❓",
+        "NEWS" => "📰",
+        "QUIZ" => "🎯",
+        "SURVEY" => "📊",
+        _ => "📝"
+    };
+}

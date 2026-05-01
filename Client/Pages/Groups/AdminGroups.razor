@@ -1,0 +1,219 @@
+@page "/admin/groups"
+@attribute [Authorize(Roles = "SuperAdmin")]
+@inject IGroupClientService GroupService
+@inject Client.Services.ITranslationService T
+
+<PageTitle>@T["AdminGroup_Title"]</PageTitle>
+
+<div class="admin-header">
+    <h1>@T["AdminGroup_Header"]</h1>
+    <button class="btn btn-primary" @onclick="ShowCreateForm">@T["AdminGroup_BtnNew"]</button>
+</div>
+
+@if (showForm)
+{
+    <div class="post-card" style="padding:20px;margin-bottom:16px;">
+        <h3 style="margin-bottom:16px;">@(isEditing ? T["AdminGroup_Edit"] : T["AdminGroup_Create"])</h3>
+        <div class="form-field">
+            <label>@T["AdminGroup_NameLabel"]</label>
+            <input type="text" @bind="formName" placeholder="@T["AdminGroup_NamePlaceholder"]" />
+        </div>
+        <div class="form-field">
+            <label>@T["AdminGroup_DescLabel"]</label>
+            <textarea @bind="formDesc" rows="3" placeholder="@T["AdminGroup_DescPlaceholder"]"></textarea>
+        </div>
+        <div class="form-field">
+            <label>@T["AdminGroup_IconLabel"]</label>
+            <div style="display:flex; gap:12px; align-items:center;">
+                @if (!string.IsNullOrEmpty(formIcon) && formIcon.StartsWith("data:image"))
+                {
+                    <img src="@formIcon" style="width:48px; height:48px; border-radius:50%; object-fit:cover; border:1px solid var(--border);" />
+                }
+                else if (!string.IsNullOrEmpty(formIcon))
+                {
+                    <span style="font-size:32px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;">@formIcon</span>
+                }
+                <InputFile OnChange="HandleIconUpload" accept="image/*" class="custom-file-input" />
+            </div>
+        </div>
+        <div class="form-field">
+            <label style="color:var(--accent-yellow);">Domaines</label>
+            @foreach (var d in formDomains)
+            {
+                <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+                    <input type="text" @bind="d.Name" placeholder="Nom du domaine" style="flex:1;background:var(--bg-lighter);" />
+                    <input type="text" @bind="d.Description" placeholder="Description..." style="flex:2;background:var(--bg-lighter);" />
+                    <button class="btn btn-outline" style="min-width:32px;padding:0;height:38px;color:var(--accent-pink);border-color:rgba(255,88,91,0.2)" @onclick="() => RemoveDomain(d)">✕</button>
+                </div>
+            }
+            <button class="btn btn-outline" style="font-size:12px;padding:6px 12px;align-self:flex-start;" @onclick="AddDomain">+ Ajouter un domaine</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-primary" @onclick="SaveGroup">@(isEditing ? T["AdminGroup_BtnUpdate"] : T["AdminGroup_BtnSubmit"])</button>
+            <button class="btn btn-outline" @onclick="CancelForm">@T["Action_Cancel"]</button>
+        </div>
+        @if (!string.IsNullOrEmpty(formMessage))
+        {
+            <div class="@(formSuccess ? "success-bar" : "error-bar")" style="margin-top:12px;">@formMessage</div>
+        }
+    </div>
+}
+
+@if (isLoading)
+{
+    <div class="loading-wrap"><div class="loader-ring"></div></div>
+}
+else if (groups.Any())
+{
+    <div class="admin-table">
+        @foreach (var g in groups)
+        {
+            <div class="post-card" style="padding:16px;display:flex;align-items:center;gap:16px;">
+                @if(!string.IsNullOrEmpty(g.IconUrl) && g.IconUrl.StartsWith("data:image"))
+                {
+                    <img src="@g.IconUrl" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                }
+                else
+                {
+                    <span style="font-size:28px;display:flex;align-items:center;justify-content:center;width:48px;height:48px;">@(string.IsNullOrEmpty(g.IconUrl) ? "📂" : g.IconUrl)</span>
+                }
+                <div style="flex:1;">
+                    <div style="font-weight:700;font-size:15px;color:var(--text-primary);">@g.Name</div>
+                    <div style="font-size:13px;color:var(--text-secondary);">@g.Description</div>
+                    <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px;">@g.MemberCount @T["GroupList_Members"]</div>
+                </div>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-ghost" @onclick="() => EditGroup(g)">@T["Action_Edit"]</button>
+                    <button class="btn btn-ghost" style="color:var(--accent-pink);" @onclick="() => DeleteGroup(g.Id)">@T["Action_Delete"]</button>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="post-card" style="padding:24px;text-align:center;color:var(--text-secondary);">
+        @T["AdminGroup_Empty"]
+    </div>
+}
+
+<style>
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .admin-header h1 { font-size: 22px; font-weight: 700; }
+    .form-field { margin-bottom: 12px; }
+    .form-field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+    }
+    .form-field input, .form-field textarea {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 10px 12px;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-family: var(--font);
+        outline: none;
+        resize: vertical;
+    }
+    .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+    .success-bar {
+        background: rgba(70,209,96,0.1);
+        color: var(--accent-green);
+        border: 1px solid rgba(70,209,96,0.3);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+    .error-bar {
+        background: rgba(255,88,91,0.1);
+        color: var(--accent-pink);
+        border: 1px solid rgba(255,88,91,0.3);
+        border-radius: var(--radius-sm);
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+</style>
+
+@code {
+    private List<GroupSummaryDto> groups = new();
+    private bool isLoading = true;
+    private bool showForm = false;
+    private bool isEditing = false;
+    private Guid editId;
+    private string formName = "", formDesc = "", formIcon = "";
+    private string formMessage = "";
+    private bool formSuccess = false;
+    private List<DomainDto> formDomains = new();
+
+    private async Task HandleIconUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var format = "image/png";
+            var resized = await e.File.RequestImageFileAsync(format, 128, 128);
+            var buffer = new byte[resized.Size];
+            await resized.OpenReadStream().ReadAsync(buffer);
+            formIcon = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    protected override async Task OnInitializedAsync() => await LoadGroups();
+
+    private async Task LoadGroups()
+    {
+        isLoading = true;
+        groups = (await GroupService.GetGroupsAsync()).ToList();
+        isLoading = false;
+    }
+
+    private void ShowCreateForm() { showForm = true; isEditing = false; formName = ""; formDesc = ""; formIcon = ""; formMessage = ""; formDomains.Clear(); }
+    private void CancelForm() { showForm = false; formMessage = ""; }
+
+    private void AddDomain() { formDomains.Add(new DomainDto { Id = Guid.NewGuid(), Name = "", Description = "" }); }
+    private void RemoveDomain(DomainDto d) { formDomains.Remove(d); }
+
+    private void EditGroup(GroupSummaryDto g)
+    {
+        showForm = true; isEditing = true;
+        editId = g.Id; formName = g.Name; formDesc = g.Description; formIcon = g.IconUrl;
+        formDomains = g.Domains.Select(d => new DomainDto { Id = d.Id, Name = d.Name, Description = d.Description }).ToList();
+        formMessage = "";
+    }
+
+    private async Task SaveGroup()
+    {
+        formMessage = "";
+        if (string.IsNullOrWhiteSpace(formName)) { formMessage = T["AdminGroup_ErrNameRequired"]; formSuccess = false; return; }
+
+        if (isEditing)
+        {
+            var res = await GroupService.UpdateGroupAsync(new UpdateGroupDto { Id = editId, Name = formName, Description = formDesc, IconUrl = formIcon, IsActive = true, Domains = formDomains });
+            formMessage = res?.Message ?? "Erreur."; formSuccess = res?.Success ?? false;
+        }
+        else
+        {
+            var res = await GroupService.CreateGroupAsync(new CreateGroupDto { Name = formName, Description = formDesc, IconUrl = formIcon, Domains = formDomains });
+            formMessage = res?.Message ?? "Erreur."; formSuccess = res?.Success ?? false;
+        }
+
+        if (formSuccess) { showForm = false; await LoadGroups(); }
+    }
+
+    private async Task DeleteGroup(Guid id)
+    {
+        await GroupService.DeleteGroupAsync(id);
+        await LoadGroups();
+    }
+}

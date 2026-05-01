@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KnowledgeHub</title>
+    <base href="/" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="Client.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">
+        <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#030303;">
+            <div class="loader-ring"></div>
+        </div>
+    </div>
+
+    <div id="blazor-error-ui"
+        style="display:none;position:fixed;bottom:0;width:100%;background:#1a1a1b;border-top:1px solid #343536;color:#d7dadc;padding:12px;text-align:center;font-family:sans-serif;z-index:1000;">
+        Une erreur est survenue.
+        <a href="." style="color:#ff4500;margin-left:8px;">Recharger</a>
+        <span class="dismiss" style="cursor:pointer;margin-left:12px;">✕</span>
+    </div>
+    <script>
+        // Instant theme restore (prevents flash of wrong theme)
+        (function () {
+            var t = localStorage.getItem('app_theme');
+            if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+        })();
+    </script>
+    <script src="_framework/blazor.webassembly.js"></script>
+</body>
+
+</html>

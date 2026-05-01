@@ -1,0 +1,135 @@
+@namespace Client.Components.PostTypes
+@using System.Text.Json
+@inject Client.Services.ITranslationService T
+
+<div class="post-card survey-compact">
+    <div class="sc-inner">
+        <div class="sc-head">
+            <span class="sc-badge">@T["Survey_Badge"]</span>
+            <span class="sc-meta">@T["Post_By_Par"] <a href="/profile/@Post.AuthorId" style="color:var(--text-secondary);font-weight:600;" @onclick:stopPropagation>@Post.AuthorName</a> · @FormatTime(Post.CreatedAt)</span>
+        </div>
+        <div class="sc-title">@if(Post.IsPinned){ <span title="Épinglé">📌 </span> }@Post.Title</div>
+
+        @if (surveyPayload != null)
+        {
+            var totalVotes = Post.InteractionCounts?.Values.Sum() ?? 0;
+            <div class="sc-question">@surveyPayload.question</div>
+            <div class="sc-opts">
+                @for (int i = 0; i < surveyPayload.options.Length; i++)
+                {
+                    var idx = i;
+                    var sel = selectedIndex == idx;
+                    var pct = hasAnswered ? GetPct(idx) : 0;
+
+                    <button class="sc-opt @(sel?"sel":"") @(hasAnswered?"done":"")"
+                            @onclick="() => SelectOption(idx)" disabled="@hasAnswered">
+                        <div class="sc-fill" style="width:@(hasAnswered ? pct : 0)%;"></div>
+                        <div class="sc-opt-inner">
+                            <span class="sc-opt-text">@surveyPayload.options[idx]</span>
+                            @if (hasAnswered) { <span class="sc-pct">@pct%</span> }
+                        </div>
+                    </button>
+                }
+            </div>
+            <div class="sc-foot">
+                @if (!hasAnswered)
+                {
+                    <button class="btn btn-primary sc-btn" disabled="@(selectedIndex == -1 || submitting)" @onclick="SubmitSurvey">
+                        @if(submitting){<span class="loader-ring" style="width:14px;height:14px;border-width:2px;"></span>}else{@T["Survey_Submit"]}
+                    </button>
+                }
+                else
+                {
+                    <span class="sc-voters">@(T["Survey_Participants"].Replace("{0}", totalVotes.ToString()))</span>
+                }
+                <StarRating PostId="Post.Id" AverageRating="Post.AverageRating" UserRating="Post.UserRating" OnRated="v => { Post.UserRating = v; StateHasChanged(); }" />
+                <ReportButton PostId="Post.Id" />
+            </div>
+        }
+    </div>
+    <CommentSection PostId="Post.Id" CommentsCount="0" />
+</div>
+
+<style>
+    .survey-compact{border-inline-start:3px solid #8b5cf6;padding:0;}
+    .sc-inner{padding:12px 14px;}
+    .sc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+    .sc-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#a78bfa;background:rgba(139,92,246,.12);padding:2px 8px;border-radius:10px;}
+    .sc-meta{font-size:11px;color:var(--text-tertiary);}
+    .sc-title{font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:8px;line-height:1.3;}
+    .sc-question{font-size:13px;color:var(--text-secondary);margin-bottom:8px;}
+    .sc-opts{display:flex;flex-direction:column;gap:5px;}
+    .sc-opt{position:relative;overflow:hidden;display:block;width:100%;padding:0;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;color:var(--text-primary);cursor:pointer;transition:all .15s;text-align:start;font-family:var(--font);}
+    .sc-opt:hover:not(:disabled){border-color:rgba(139,92,246,.4);background:rgba(139,92,246,.04);}
+    .sc-opt.sel:not(:disabled){border-color:#8b5cf6;box-shadow:0 0 0 1px #8b5cf6;}
+    .sc-opt.done{cursor:default;border-color:transparent;background:var(--bg-hover);}
+    .sc-fill{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(90deg,rgba(139,92,246,.25),rgba(59,130,246,.2));transition:width .8s cubic-bezier(.34,1.56,.64,1);z-index:1;}
+    .sc-opt.sel .sc-fill{background:linear-gradient(90deg,rgba(139,92,246,.45),rgba(59,130,246,.35));}
+    .sc-opt-inner{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;padding:7px 10px;}
+    .sc-opt-text{font-weight:600;font-size:13px;}
+    .sc-pct{font-weight:800;font-size:13px;color:var(--text-primary);}
+    .sc-foot{margin-top:8px;display:flex;justify-content:space-between;align-items:center;min-height:30px;}
+    .sc-btn{padding:5px 18px;font-size:12px;border-radius:16px;}
+    .sc-voters{color:#a78bfa;font-size:11px;font-weight:700;background:rgba(139,92,246,.1);padding:3px 10px;border-radius:10px;}
+</style>
+
+@code {
+    [Parameter] public PostDetailDto Post { get; set; } = default!;
+    [Inject] IPostClientService PostService { get; set; } = default!;
+
+    public class SurveyPayload
+    {
+        public string question { get; set; } = string.Empty;
+        public string[] options { get; set; } = Array.Empty<string>();
+    }
+
+    private SurveyPayload? surveyPayload;
+    private int selectedIndex = -1;
+    private bool hasAnswered = false;
+    private bool submitting = false;
+
+    protected override void OnInitialized()
+    {
+        if (Post.Sections.TryGetValue("CONTENT", out var json))
+        {
+            try
+            {
+                surveyPayload = JsonSerializer.Deserialize<SurveyPayload>(json);
+                if (Post.UserVotedIndex != -1) { selectedIndex = Post.UserVotedIndex; hasAnswered = true; }
+            }
+            catch { }
+        }
+    }
+
+    private int GetPct(int idx)
+    {
+        if (Post.InteractionCounts == null || !Post.InteractionCounts.ContainsKey(idx)) return 0;
+        var total = Post.InteractionCounts.Values.Sum();
+        return total == 0 ? 0 : (int)Math.Round((double)Post.InteractionCounts[idx] / total * 100);
+    }
+
+    private void SelectOption(int index) { if (!hasAnswered) selectedIndex = index; }
+
+    private async Task SubmitSurvey()
+    {
+        submitting = true;
+        var res = await PostService.InteractAsync(Post.Id, selectedIndex);
+        if (res is { Success: true })
+        {
+            hasAnswered = true;
+            Post.UserVotedIndex = selectedIndex;
+            if (Post.InteractionCounts == null) Post.InteractionCounts = new();
+            if (!Post.InteractionCounts.ContainsKey(selectedIndex)) Post.InteractionCounts[selectedIndex] = 0;
+            Post.InteractionCounts[selectedIndex]++;
+        }
+        submitting = false;
+        StateHasChanged();
+    }
+
+    private string FormatTime(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalHours < 24) return T["Time_HoursAgo"].Replace("{0}", ((int)diff.TotalHours).ToString());
+        return T["Time_Date"].Replace("{0}", dt.ToString("dd/MM"));
+    }
+}

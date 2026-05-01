@@ -1,0 +1,511 @@
+@page "/admin/dashboard"
+@using BaseLibrary.DTOs
+@using BaseLibrary.Helpers
+@inject ClientLibrary.Services.Implementations.IAdminClientService AdminService
+@inject Client.Services.ITranslationService T
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+
+<PageTitle>Admin Dashboard — KnowledgeHub</PageTitle>
+
+@if (loading)
+{
+    <div class="loading-wrap"><div class="loader-ring"></div></div>
+}
+else if (data != null)
+{
+    <!-- ─── Header ─────────────────────────────────────────────── -->
+    <div class="adm-header">
+        <div>
+            <h1 class="adm-title">@T["Admin_Dash_Title"]</h1>
+            <p class="adm-subtitle">@T["Admin_Dash_Subtitle"]</p>
+        </div>
+    </div>
+
+    <!-- ─── Global KPI Cards ──────────────────────────────────── -->
+    <div class="adm-kpi-grid">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-icon">📝</div>
+            <div class="kpi-val">@data.TotalPosts</div>
+            <div class="kpi-label">@T["Admin_Dash_TotalPosts"]</div>
+        </div>
+        <div class="kpi-card kpi-green">
+            <div class="kpi-icon">👤</div>
+            <div class="kpi-val">@data.TotalUsers</div>
+            <div class="kpi-label">@T["Admin_Dash_Users"]</div>
+        </div>
+        <div class="kpi-card kpi-orange">
+            <div class="kpi-icon">💬</div>
+            <div class="kpi-val">@data.TotalComments</div>
+            <div class="kpi-label">@T["Admin_Dash_Comments"]</div>
+        </div>
+        <div class="kpi-card kpi-red">
+            <div class="kpi-icon">🚨</div>
+            <div class="kpi-val">@data.TotalReports</div>
+            <div class="kpi-label">@T["Admin_Dash_Reports"]</div>
+        </div>
+    </div>
+
+    <!-- ─── Row 1: Top Rating + Bad Rating ───────────────────── -->
+    <div class="adm-row2">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">⭐</span>
+                <span>@T["Admin_Dash_TopRating"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.TopRatingUsers.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos @GetMedalClass(i)">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-bar-wrap">
+                                <div class="rank-bar rank-bar-gold" style="width: @(u.Score / 5.0 * 100)%"></div>
+                            </div>
+                        </div>
+                        <div class="rank-score">⭐ @u.Score.ToString("0.0")</div>
+                    </div>
+                }
+                @if (!data.TopRatingUsers.Any()) { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">⚠️</span>
+                <span>@T["Admin_Dash_BadRating"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.BadRatingUsers.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos rank-bad">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-bar-wrap">
+                                <div class="rank-bar rank-bar-red" style="width: @(u.Score / 5.0 * 100)%"></div>
+                            </div>
+                        </div>
+                        <div class="rank-score rank-neg">⭐ @u.Score.ToString("0.0")</div>
+                    </div>
+                }
+                @if (!data.BadRatingUsers.Any()) { <p class="adm-empty">✅ @T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Row 2: Top Flèche + Flèche Négatives ─────────────── -->
+    <div class="adm-row2">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">⬆️</span>
+                <span>@T["Admin_Dash_TopVotes"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.TopVoteUsers.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos @GetMedalClass(i)">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-meta">@u.CommentCount commentaires</div>
+                        </div>
+                        <div class="rank-score rank-pos-green">+@u.VoteBalance</div>
+                    </div>
+                }
+                @if (!data.TopVoteUsers.Any()) { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">⬇️</span>
+                <span>@T["Admin_Dash_NegVotes"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.NegativeVoteUsers.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos rank-bad">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-meta">@u.CommentCount commentaires</div>
+                        </div>
+                        <div class="rank-score rank-neg">@u.VoteBalance</div>
+                    </div>
+                }
+                @if (!data.NegativeVoteUsers.Any()) { <p class="adm-empty">✅ @T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Row 3: Top Solutions + Top Problemes ─────────────── -->
+    <div class="adm-row2">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">💡</span>
+                <span>@T["Admin_Dash_ChampSolutions"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.TopSolutionAuthors.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos @GetMedalClass(i)">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-bar-wrap">
+                                @{ var maxSol = data.TopSolutionAuthors.Max(x => x.PostCount); }
+                                <div class="rank-bar rank-bar-green" style="width: @(maxSol > 0 ? (double)u.PostCount / maxSol * 100 : 0)%"></div>
+                            </div>
+                        </div>
+                        <div class="rank-score">💡 @u.PostCount</div>
+                    </div>
+                }
+                @if (!data.TopSolutionAuthors.Any()) { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <span class="adm-card-icon">❓</span>
+                <span>@T["Admin_Dash_ChampProblems"]</span>
+            </div>
+            <div class="rank-list">
+                @foreach (var (u, i) in data.TopProblemAuthors.Select((u, i) => (u, i)))
+                {
+                    <div class="rank-item">
+                        <div class="rank-pos @GetMedalClass(i)">@(i + 1)</div>
+                        <div class="rank-info">
+                            <div class="rank-user">@u.UserId</div>
+                            <div class="rank-bar-wrap">
+                                @{ var maxProb = data.TopProblemAuthors.Max(x => x.PostCount); }
+                                <div class="rank-bar rank-bar-orange" style="width: @(maxProb > 0 ? (double)u.PostCount / maxProb * 100 : 0)%"></div>
+                            </div>
+                        </div>
+                        <div class="rank-score">❓ @u.PostCount</div>
+                    </div>
+                }
+                @if (!data.TopProblemAuthors.Any()) { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Trending Domains ──────────────────────────────────── -->
+    <div class="adm-card adm-full">
+        <div class="adm-card-header">
+            <span class="adm-card-icon">📈</span>
+            <span>@T["Admin_Dash_TrendDomains"]</span>
+        </div>
+        @if (data.TrendingDomains.Any())
+        {
+            <div class="trend-grid">
+                @{ var maxD = data.TrendingDomains.Max(d => d.PostCount); }
+                @foreach (var d in data.TrendingDomains)
+                {
+                    <div class="trend-item">
+                        <div class="trend-name">@d.DomainName</div>
+                        <div class="trend-group">@d.GroupName</div>
+                        <div class="trend-bar-wrap">
+                            <div class="trend-bar" style="width: @(maxD > 0 ? (double)d.PostCount / maxD * 100 : 0)%"></div>
+                        </div>
+                        <div class="trend-count">@d.PostCount postes</div>
+                    </div>
+                }
+            </div>
+        }
+        else { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+    </div>
+
+    <!-- ─── Trending Problems ─────────────────────────────────── -->
+    <div class="adm-card adm-full">
+        <div class="adm-card-header">
+            <span class="adm-card-icon">🔥</span>
+            <span>@T["Admin_Dash_TrendProblems"]</span>
+        </div>
+        @if (data.TrendingProblems.Any())
+        {
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>@T["Create_PostTitle"]</th>
+                        <th>@T["Search_Author"]</th>
+                        <th>👁️ @T["Action_Views"]</th>
+                        <th>⭐ @T["Star_Global"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (p, i) in data.TrendingProblems.Select((p, i) => (p, i)))
+                    {
+                        <tr>
+                            <td><span class="rank-pos @GetMedalClass(i)">@(i+1)</span></td>
+                            <td>
+                                <a href="/posts/@p.PostId" class="adm-link">@p.Title</a>
+                            </td>
+                            <td>@p.AuthorId</td>
+                            <td>@p.ViewsCount</td>
+                            <td>@p.AverageRating.ToString("0.0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+    </div>
+
+    <!-- ─── Top Reporters ─────────────────────────────────────── -->
+    <div class="adm-card adm-full">
+        <div class="adm-card-header">
+            <span class="adm-card-icon">🚨</span>
+            <span>@T["Admin_Dash_TopReporters"]</span>
+            <a href="/admin/reporters" class="adm-btn-link">@T["Admin_Dash_ViewAll"]</a>
+        </div>
+        @if (data.TopReporters.Any())
+        {
+            <table class="adm-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>@T["Search_Author"]</th>
+                        <th>@T["Admin_Dash_Reports"]</th>
+                        <th>@T["Admin_Rep_Level"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (u, i) in data.TopReporters.Select((u, i) => (u, i)))
+                    {
+                        <tr>
+                            <td><span class="rank-pos @GetMedalClass(i)">@(i+1)</span></td>
+                            <td>@u.UserId</td>
+                            <td>@u.ReportCount</td>
+                            <td>
+                                <span class="badge @GetReporterBadge(u.ReportCount)">
+                                    @GetReporterLevel(u.ReportCount)
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else { <p class="adm-empty">@T["Admin_Dash_NoData"]</p> }
+    </div>
+}
+else
+{
+    <div class="post-card" style="padding:40px;text-align:center;">
+        <p>@T["Admin_Dash_Error"]</p>
+    </div>
+}
+
+<style>
+    /* ── Header ─────────────────────────── */
+    .adm-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    .adm-title {
+        font-size: 24px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent), #f97316);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0 0 4px;
+    }
+    .adm-subtitle { color: var(--text-tertiary); font-size: 14px; margin: 0; }
+
+    /* ── KPI Cards ──────────────────────── */
+    .adm-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    @@media (max-width: 768px) { .adm-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.2s;
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+    }
+    .kpi-card:hover { transform: translateY(-3px); }
+    .kpi-blue::before  { background: #3b82f6; }
+    .kpi-green::before { background: #22c55e; }
+    .kpi-orange::before{ background: #f97316; }
+    .kpi-red::before   { background: #ef4444; }
+
+    .kpi-icon { font-size: 28px; margin-bottom: 8px; }
+    .kpi-val  { font-size: 32px; font-weight: 800; color: var(--text-primary); }
+    .kpi-label{ font-size: 12px; color: var(--text-tertiary); margin-top: 4px; }
+
+    /* ── Row of 2 cards ─────────────────── */
+    .adm-row2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+    @@media (max-width: 768px) { .adm-row2 { grid-template-columns: 1fr; } }
+
+    /* ── Generic card ───────────────────── */
+    .adm-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+    .adm-full { grid-column: 1 / -1; }
+
+    .adm-card-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+    .adm-card-icon { font-size: 20px; }
+    .adm-btn-link {
+        margin-left: auto;
+        color: var(--accent);
+        font-size: 13px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .adm-btn-link:hover { text-decoration: underline; }
+
+    /* ── Rank list ──────────────────────── */
+    .rank-list { display: flex; flex-direction: column; gap: 10px; }
+    .rank-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .rank-pos {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 800;
+        background: var(--bg-hover);
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+    .rank-gold   { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a1a1a; }
+    .rank-silver { background: linear-gradient(135deg, #9ca3af, #6b7280); color: #fff; }
+    .rank-bronze { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+    .rank-bad    { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-user { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+    .rank-meta { font-size: 11px; color: var(--text-tertiary); }
+    .rank-bar-wrap {
+        height: 4px;
+        background: var(--bg-hover);
+        border-radius: 4px;
+        margin-top: 4px;
+        overflow: hidden;
+    }
+    .rank-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.6s ease;
+    }
+    .rank-bar-gold   { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .rank-bar-red    { background: linear-gradient(90deg, #ef4444, #dc2626); }
+    .rank-bar-green  { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .rank-bar-orange { background: linear-gradient(90deg, #f97316, #ea580c); }
+
+    .rank-score      { font-size: 13px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+    .rank-pos-green  { color: #22c55e; }
+    .rank-neg        { color: #ef4444; }
+
+    /* ── Trending grid ──────────────────── */
+    .trend-grid { display: flex; flex-direction: column; gap: 10px; }
+    .trend-item { display: flex; align-items: center; gap: 12px; }
+    .trend-name  { font-weight: 600; font-size: 13px; width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trend-group { font-size: 11px; color: var(--text-tertiary); width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .trend-bar-wrap { flex: 1; height: 8px; background: var(--bg-hover); border-radius: 8px; overflow: hidden; }
+    .trend-bar { height: 100%; background: linear-gradient(90deg, var(--accent), #f97316); border-radius: 8px; transition: width 0.6s; }
+    .trend-count { font-size: 12px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+
+    /* ── Table ──────────────────────────── */
+    .adm-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .adm-table th {
+        text-align: left;
+        padding: 10px 12px;
+        color: var(--text-tertiary);
+        font-size: 11px;
+        text-transform: uppercase;
+        border-bottom: 1px solid var(--border);
+    }
+    .adm-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-primary);
+    }
+    .adm-table tr:last-child td { border-bottom: none; }
+    .adm-table tr:hover td { background: var(--bg-hover); }
+    .adm-link { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .adm-link:hover { text-decoration: underline; }
+
+    /* ── Badge ──────────────────────────── */
+    .badge { padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+    .badge-low    { background: rgba(34,197,94,0.15);  color: #22c55e; }
+    .badge-medium { background: rgba(249,115,22,0.15); color: #f97316; }
+    .badge-high   { background: rgba(239,68,68,0.15);  color: #ef4444; }
+
+    .adm-empty { color: var(--text-tertiary); font-size: 13px; text-align: center; padding: 12px 0; }
+</style>
+
+@code {
+    private AdminDashboardDto? data;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var role = authState.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+        if (role != "SuperAdmin" && role != "Moderator")
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        data = await AdminService.GetDashboardAsync();
+        loading = false;
+    }
+
+    private string GetMedalClass(int i) => i switch { 0 => "rank-gold", 1 => "rank-silver", 2 => "rank-bronze", _ => "" };
+
+    private string GetReporterBadge(int count) => count switch
+    {
+        >= 10 => "badge badge-high",
+        >= 5  => "badge badge-medium",
+        _     => "badge badge-low"
+    };
+
+    private string GetReporterLevel(int count) => count switch
+    {
+        >= 10 => T["Admin_Rep_Abusive"],
+        >= 5  => T["Admin_Rep_Frequent"],
+        _     => T["Admin_Rep_Normal"]
+    };
+}

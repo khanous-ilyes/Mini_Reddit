@@ -1,0 +1,129 @@
+@namespace Client.Components
+@inject IPostClientService PostService
+@inject Client.Services.ITranslationService T
+@inject NavigationManager Nav
+@using Microsoft.AspNetCore.Components.Authorization
+
+<AuthorizeView>
+    <Authorized Context="authCtx">
+        @{
+            var userId = authCtx.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "";
+            var role = authCtx.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+            var canControl = authorId == userId || role == "SuperAdmin";
+        }
+        @if (canControl)
+        {
+            <div class="post-actions-wrap">
+                <button class="post-action-btn" @onclick="ToggleMenu" @onclick:stopPropagation>⋮</button>
+                @if (menuOpen)
+                {
+                    <div class="post-actions-dropdown">
+                        @if (role == "SuperAdmin")
+                        {
+                            <button class="pac-item" @onclick="TogglePin" @onclick:stopPropagation>
+                                @(IsPinned ? "📌 Désépingler" : "📌 Épingler")
+                            </button>
+                        }
+                        <button class="pac-item edit" @onclick="GoToEdit" @onclick:stopPropagation>@T["Action_Edit"]</button>
+                        <button class="pac-item delete" @onclick="ConfirmDelete" @onclick:stopPropagation>@T["Action_Delete"]</button>
+                    </div>
+                }
+            </div>
+        }
+    </Authorized>
+</AuthorizeView>
+
+@if (showConfirm)
+{
+    <div class="confirm-overlay" @onclick="CancelDelete">
+        <div class="confirm-box" @onclick:stopPropagation="true">
+            <p>@T["Action_ConfirmDelete"]</p>
+            <div style="display:flex;gap:12px;margin-top:16px;">
+                <button class="btn btn-outline" style="flex:1;" @onclick="CancelDelete" @onclick:stopPropagation>@T["Action_Cancel"]</button>
+                <button class="btn btn-primary" style="flex:1;background:var(--accent-pink);" @onclick="DeletePost" @onclick:stopPropagation disabled="@deleting">
+                    @if(deleting){<span class="loader-ring" style="width:16px;height:16px;border-width:2px;"></span>} else {<span>@T["Action_Delete"]</span>}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<style>
+    .post-actions-wrap { position: relative; display: inline-block; }
+    
+    .post-action-btn {
+        background: transparent; border: none; color: var(--text-tertiary);
+        font-size: 22px; font-weight: 900; cursor: pointer; padding: 0 8px; line-height: 1;
+        border-radius: 8px; transition: all 0.15s;
+    }
+    .post-action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    
+    .post-actions-dropdown {
+        position: absolute; right: 0; top: 32px; z-index: 100;
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: var(--radius-md); overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        min-width: 160px;
+        animation: slideDown 0.15s ease;
+    }
+    
+    .pac-item {
+        display: block; width: 100%; padding: 12px 16px; text-align: left;
+        background: none; border: none; color: var(--text-secondary); font-size: 14px;
+        font-weight: 600; cursor: pointer; transition: background 0.15s;
+    }
+    .pac-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .pac-item.delete:hover { color: var(--accent-pink); background: rgba(255,88,91,0.07); }
+
+    .confirm-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeIn 0.2s;
+    }
+    .confirm-box {
+        background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+        padding: 28px; max-width: 380px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        animation: slideUp 0.2s ease-out;
+    }
+    .confirm-box p { color: var(--text-secondary); font-size: 15px; }
+    
+    @@keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+    @@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @@keyframes slideUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+</style>
+
+@code {
+    [Parameter] public Guid PostId { get; set; }
+    [Parameter] public string authorId { get; set; } = string.Empty;
+    [Parameter] public bool IsPinned { get; set; }
+    [Parameter] public EventCallback OnDeleted { get; set; }
+    [Parameter] public EventCallback<bool> OnPinnedChanged { get; set; }
+
+    private bool menuOpen = false;
+    private bool showConfirm = false;
+    private bool deleting = false;
+
+    private void ToggleMenu() { menuOpen = !menuOpen; showConfirm = false; }
+    private void GoToEdit() { menuOpen = false; Nav.NavigateTo($"/edit/{PostId}"); }
+    private void ConfirmDelete() { menuOpen = false; showConfirm = true; }
+    private void CancelDelete() { showConfirm = false; }
+
+    private async Task DeletePost()
+    {
+        deleting = true;
+        var res = await PostService.DeletePostAsync(PostId);
+        deleting = false;
+        showConfirm = false;
+        if (res is { Success: true }) await OnDeleted.InvokeAsync();
+    }
+
+    private async Task TogglePin()
+    {
+        menuOpen = false;
+        var res = await PostService.TogglePinPostAsync(PostId);
+        if (res is { Success: true })
+        {
+            await OnPinnedChanged.InvokeAsync(res.Data); // res.Data contains the new IsPinned boolean
+        }
+    }
+}

@@ -1,0 +1,78 @@
+@namespace Client.Components.PostTypes
+@inject Client.Services.ITranslationService T
+
+<div class="post-card">
+    <div class="post-card-inner">
+
+        
+        <div class="post-body-col">
+            <!-- Meta -->
+            <div class="post-meta">
+                <span class="badge badge-problem">@T["Problem_Badge"]</span>
+                <span>•</span>
+                <span>@T["Post_By"] <a href="/profile/@Post.AuthorId" class="author" @onclick:stopPropagation>@Post.AuthorName</a></span>
+                <span>•</span>
+                <span>@FormatTime(Post.CreatedAt)</span>
+                <span>•</span>
+                <span>@Post.AuthorStructure</span>
+            </div>
+            
+            <!-- Title -->
+            <h3 class="post-title">@if(Post.IsPinned){ <span title="Épinglé">📌 </span> }@Post.Title</h3>
+            
+            <!-- Structured sections -->
+            <div class="post-preview">
+                @if(Post.Sections.TryGetValue("PROBLEM_DESC", out var prob))
+                {
+                    <div class="section-block problem">
+                        <div class="section-label">@T["Section_Description"]</div>
+                        <p>@prob</p>
+                    </div>
+                }
+                @if(Post.Sections.TryGetValue("CONTEXT", out var ctx))
+                {
+                    <div class="section-block context">
+                        <div class="section-label">@T["Section_ContextTried"]</div>
+                        <p>@ctx</p>
+                    </div>
+                }
+            </div>
+            
+            <!-- Tags -->
+            @if(Post.Hashtags.Any())
+            {
+                <div class="post-tags">
+                    @foreach(var tag in Post.Hashtags)
+                    {
+                        <span class="tag">@tag</span>
+                    }
+                </div>
+            }
+            
+            <!-- Actions bar -->
+            <div class="post-actions" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; gap:16px;">
+                    <button class="action-btn" style="color:var(--accent-green);">@T["Action_ProposeSolution"]</button>
+                    <button class="action-btn">💬 @Post.CommentsCount @T["Action_Comments"]</button>
+
+                    <button class="action-btn">👁️ @Post.ViewsCount @T["Action_Views"]</button>
+                </div>
+                <StarRating PostId="Post.Id" AverageRating="Post.AverageRating" UserRating="Post.UserRating" OnRated="v => { Post.UserRating = v; StateHasChanged(); }" />
+                <ReportButton PostId="Post.Id" />
+            </div>
+        </div>
+    </div>
+    <CommentSection PostId="Post.Id" CommentsCount="Post.CommentsCount" />
+</div>
+
+@code {
+    [Parameter] public PostDetailDto Post { get; set; } = default!;
+
+    private string FormatTime(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 60) return T["Time_MinsAgo"].Replace("{0}", ((int)diff.TotalMinutes).ToString());
+        if (diff.TotalHours < 24) return T["Time_HoursAgo"].Replace("{0}", ((int)diff.TotalHours).ToString());
+        return T["Time_DaysAgo"].Replace("{0}", ((int)diff.TotalDays).ToString());
+    }
+}

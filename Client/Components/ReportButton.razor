@@ -1,0 +1,131 @@
+@namespace Client.Components
+@inject ClientLibrary.Services.Implementations.IPostClientService PostService
+@inject Client.Services.ITranslationService T
+
+<div class="report-wrapper">
+    <button class="report-btn" @onclick="ToggleReportPanel">
+        ⚠ @T["Report_Signal"]
+    </button>
+
+    @if (showPanel)
+    {
+        <div class="report-panel post-card">
+            <h4 style="margin-bottom:12px; font-weight:700; color:var(--accent-pink);">@T["Report_Title"]</h4>
+
+            @if (submitted)
+            {
+                <div style="padding:16px; text-align:center; color:var(--accent-green);">
+                    ✅ @T["Report_Success"]
+                </div>
+            }
+            else if (reasons == null || !reasons.Any())
+            {
+                <div style="padding:12px; text-align:center; color:var(--text-secondary);">
+                    @T["Report_NoReasons"]
+                </div>
+            }
+            else
+            {
+                <div class="report-reasons-list">
+                    @foreach (var r in reasons)
+                    {
+                        <label class="report-reason-option @(selectedReasonId == r.Id ? "selected" : "")" @onclick="() => selectedReasonId = r.Id">
+                            <input type="radio" name="reason-@PostId" checked="@(selectedReasonId == r.Id)" />
+                            <span>@(isArabic ? r.ReasonTextAr : r.ReasonTextFr)</span>
+                        </label>
+                    }
+                </div>
+
+                <textarea class="report-comment" placeholder="@T["Report_CommentPlaceholder"]" @bind="additionalComment" rows="2"></textarea>
+
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button class="btn btn-primary" style="flex:1;" disabled="@(selectedReasonId == Guid.Empty || submitting)" @onclick="SubmitReport">
+                        @(submitting ? "..." : T["Report_Submit"])
+                    </button>
+                    <button class="btn btn-outline" style="flex:1;" @onclick="() => showPanel = false">
+                        @T["Report_Cancel"]
+                    </button>
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMsg))
+                {
+                    <div style="margin-top:8px; color:var(--accent-pink); font-size:12px;">@errorMsg</div>
+                }
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .report-wrapper { position: relative; display: inline-block; }
+    .report-btn {
+        background: transparent; border: 1px solid var(--accent-pink); color: var(--accent-pink);
+        padding: 4px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+    }
+    .report-btn:hover { background: var(--accent-pink); color: white; }
+    .report-panel {
+        position: absolute; top: 100%; right: 0; z-index: 100; width: 320px; padding: 16px;
+        margin-top: 8px; border: 1px solid var(--accent-pink); border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .report-reasons-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+    .report-reason-option {
+        display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px;
+        cursor: pointer; font-size: 13px; color: var(--text-primary); background: var(--bg-hover);
+        transition: all 0.15s; border: 1px solid transparent;
+    }
+    .report-reason-option:hover, .report-reason-option.selected {
+        border-color: var(--accent-pink); background: rgba(255,107,107,0.1);
+    }
+    .report-reason-option input { accent-color: var(--accent-pink); }
+    .report-comment {
+        width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+        background: var(--bg-hover); color: var(--text-primary); font-size: 13px; resize: none;
+    }
+</style>
+
+@code {
+    [Parameter] public Guid PostId { get; set; }
+
+    private bool showPanel = false;
+    private bool submitted = false;
+    private bool submitting = false;
+    private List<BaseLibrary.DTOs.Posts.ReportReasonDto>? reasons;
+    private Guid selectedReasonId = Guid.Empty;
+    private string additionalComment = "";
+    private string errorMsg = "";
+    private bool isArabic = false;
+
+    private async Task ToggleReportPanel()
+    {
+        showPanel = !showPanel;
+        if (showPanel && reasons == null)
+        {
+            isArabic = T["Lang"] == "ar";
+            var res = await PostService.GetReportReasonsAsync();
+            if (res != null && res.Success) reasons = res.Data ?? new();
+            else reasons = new();
+        }
+    }
+
+    private async Task SubmitReport()
+    {
+        if (selectedReasonId == Guid.Empty) return;
+        submitting = true; errorMsg = "";
+        var dto = new BaseLibrary.DTOs.Posts.SubmitReportDto
+        {
+            ReasonId = selectedReasonId,
+            AdditionalComments = string.IsNullOrWhiteSpace(additionalComment) ? null : additionalComment
+        };
+        var res = await PostService.ReportPostAsync(PostId, dto);
+        submitting = false;
+        if (res != null && res.Success)
+        {
+            submitted = true;
+        }
+        else
+        {
+            errorMsg = res?.Message ?? "Error";
+        }
+    }
+}

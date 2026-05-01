@@ -1,0 +1,121 @@
+@page "/admin/report-reasons"
+@using BaseLibrary.DTOs.Posts
+@inject ClientLibrary.Services.Implementations.IPostClientService PostService
+@inject Client.Services.ITranslationService T
+
+<PageTitle>@T["Admin_ReportReasons"]</PageTitle>
+
+<div class="admin-container">
+    <h2 class="admin-title">@T["Admin_RR_Title"]</h2>
+
+    <!-- Add New Form -->
+    <div class="post-card" style="padding:20px; margin-bottom:24px;">
+        <h4 style="margin-bottom:12px; font-weight:700;">@T["Admin_RR_AddNew"]</h4>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:1; min-width:200px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">@T["Admin_RR_ArLabel"]</label>
+                <input type="text" class="form-input" @bind="newReasonAr" placeholder="محتوى غير لائق..." />
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <label style="font-size:12px; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">@T["Admin_RR_FrLabel"]</label>
+                <input type="text" class="form-input" @bind="newReasonFr" placeholder="Contenu inapproprié..." />
+            </div>
+            <button class="btn btn-primary" style="padding:8px 20px;" disabled="@saving" @onclick="SaveReason">
+                @(saving ? "..." : T["Admin_RR_Save"])
+            </button>
+        </div>
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div style="margin-top:8px; font-size:13px; color:var(--accent-green);">@message</div>
+        }
+    </div>
+
+    <!-- List -->
+    @if (loading)
+    {
+        <div style="text-align:center; padding:24px;"><div class="loader-ring"></div></div>
+    }
+    else if (reasons == null || !reasons.Any())
+    {
+        <div class="post-card" style="padding:24px; text-align:center; color:var(--text-secondary);">
+            @T["Admin_RR_Empty"]
+        </div>
+    }
+    else
+    {
+        <div class="reasons-grid">
+            @foreach (var r in reasons)
+            {
+                <div class="post-card reason-item">
+                    <div style="flex:1;">
+                        <div style="font-weight:700; color:var(--text-primary); margin-bottom:4px;">🇸🇦 @r.ReasonTextAr</div>
+                        <div style="font-size:13px; color:var(--text-secondary);">🇫🇷 @r.ReasonTextFr</div>
+                    </div>
+                    <button class="btn btn-outline" style="color:var(--accent-pink); border-color:var(--accent-pink); padding:4px 12px; font-size:12px;" @onclick="() => DeleteReason(r.Id)">
+                        @T["Admin_RR_Delete"]
+                    </button>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .admin-container { max-width: 700px; margin: 0 auto; }
+    .admin-title { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 20px; }
+    .reasons-grid { display: flex; flex-direction: column; gap: 12px; }
+    .reason-item { display: flex; align-items: center; gap: 16px; padding: 16px !important; }
+    .form-input {
+        width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+        background: var(--bg-hover); color: var(--text-primary); font-size: 14px;
+    }
+</style>
+
+@code {
+    private List<ReportReasonDto> reasons = new();
+    private bool loading = true;
+    private bool saving = false;
+    private string newReasonAr = "";
+    private string newReasonFr = "";
+    private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReasons();
+    }
+
+    private async Task LoadReasons()
+    {
+        loading = true;
+        var res = await PostService.GetReportReasonsAsync();
+        if (res != null && res.Success) reasons = res.Data ?? new();
+        loading = false;
+    }
+
+    private async Task SaveReason()
+    {
+        if (string.IsNullOrWhiteSpace(newReasonAr) || string.IsNullOrWhiteSpace(newReasonFr)) return;
+        saving = true; message = "";
+        var res = await PostService.CreateReportReasonAsync(new CreateReportReasonDto
+        {
+            ReasonTextAr = newReasonAr.Trim(),
+            ReasonTextFr = newReasonFr.Trim()
+        });
+        saving = false;
+        if (res != null && res.Success)
+        {
+            if (res.Data != null) reasons.Add(res.Data);
+            newReasonAr = ""; newReasonFr = "";
+            message = "✅";
+        }
+    }
+
+    private async Task DeleteReason(Guid id)
+    {
+        var res = await PostService.DeleteReportReasonAsync(id);
+        if (res != null && res.Success)
+        {
+            reasons.RemoveAll(r => r.Id == id);
+        }
+    }
+}

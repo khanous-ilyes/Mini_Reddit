@@ -1,0 +1,366 @@
+﻿@inherits LayoutComponentBase
+@inject Client.Services.ITranslationService T
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Nav
+@inject IGroupClientService GroupService
+
+<div class="app-shell" dir="@T.GetDirection()">
+    <!-- TOP BAR (Reddit-style) -->
+    <header class="top-bar">
+        <a href="/" class="logo">
+            <svg width="400" height="400" viewBox="0 0 400 400" role="img" xmlns="http://www.w3.org/2000/svg" style="width:34px;height:34px;margin-right:10px;">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Forum échange logo</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Logo orange avec cerveau en réseau et flèches cycliques blanches</desc>
+
+  <circle cx="200" cy="200" r="190" fill="#FF4500" style="fill:rgb(255, 69, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <g stroke="white" fill="none" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <path d="M 200 60 A 148 148 0 0 1 340 148" stroke-width="14" stroke-linecap="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <polygon points="340,148 320,130 355,120" fill="white" stroke="none" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <path d="M 340 148 A 148 148 0 0 1 270 330" stroke-width="14" stroke-linecap="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <polygon points="270,330 260,308 288,312" fill="white" stroke="none" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <path d="M 270 330 A 148 148 0 0 1 60 200" stroke-width="14" stroke-linecap="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <polygon points="60,200 82,186 78,214" fill="white" stroke="none" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+    <path d="M 60 200 A 148 148 0 0 1 200 60" stroke-width="14" stroke-linecap="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:14px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <polygon points="200,60 178,78 210,82" fill="white" stroke="none" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+  <circle cx="200" cy="200" r="90" fill="#FF4500" style="fill:rgb(255, 69, 0);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <g fill="white" stroke="none" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <circle cx="200" cy="148" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="248" cy="178" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="248" cy="224" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="200" cy="254" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="152" cy="224" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="152" cy="178" r="10" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="200" cy="200" r="13" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(255, 255, 255);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+  <g stroke="white" stroke-width="4" fill="none" stroke-linecap="round" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <line x1="200" y1="158" x2="200" y2="187" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="240" y1="182" x2="213" y2="195" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="240" y1="220" x2="213" y2="207" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="200" y1="244" x2="200" y2="213" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="160" y1="220" x2="187" y2="207" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="160" y1="182" x2="187" y2="195" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="200" y1="148" x2="248" y2="178" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="248" y1="178" x2="248" y2="224" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="248" y1="224" x2="200" y2="254" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="200" y1="254" x2="152" y2="224" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="152" y1="224" x2="152" y2="178" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <line x1="152" y1="178" x2="200" y2="148" style="fill:none;stroke:rgb(255, 255, 255);color:rgb(255, 255, 255);stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+</svg>           KnowledgeHub
+        </a>
+        
+        <div class="search-wrap" @onclick="() => showSearch = true" style="cursor:pointer;">
+            <input type="text" placeholder="🔍  @T["Nav_Search"]" readonly style="cursor:pointer;" />
+        </div>
+        
+        <div class="user-actions">
+            <!-- Theme Toggle -->
+            <button class="theme-toggle" @onclick="ToggleTheme" title="@(isDarkMode ? "Light mode" : "Dark mode")">
+                <div class="toggle-track">
+                    <span class="toggle-icon-sun">☀️</span>
+                    <span class="toggle-icon-moon">🌙</span>
+                </div>
+                <div class="toggle-knob"></div>
+            </button>
+            <div style="width:1px;height:20px;background:var(--border);margin:0 4px;"></div>
+            <!-- Language Toggle -->
+            <button class="btn-icon" @onclick='() => ChangeLanguage("fr")' style="font-size:14px; font-weight:700; @(T.CurrentLang=="fr"?"color:var(--accent-green);":"")">FR</button>
+            <button class="btn-icon" @onclick='() => ChangeLanguage("ar")' style="font-size:14px; font-weight:700; @(T.CurrentLang=="ar"?"color:var(--accent-green);":"")">AR</button>
+            <div style="width:1px;height:20px;background:var(--border);margin:0 8px;"></div>
+            <AuthorizeView>
+                <Authorized>
+                    <button class="btn-icon" title="Notifications">🔔</button>
+                    <a href="create" class="btn-icon" title="Créer un poste" style="text-decoration:none;">✏️</a>
+                    <AuthorizeView Roles="SuperAdmin">
+                        <Authorized Context="adminCtx">
+                            <a href="admin/dashboard" class="btn-icon" title="Analytics" style="text-decoration:none;">📊</a>
+                            <a href="admin/groups" class="btn-icon" title="Admin" style="text-decoration:none;">⚙️</a>
+                            <a href="admin/report-reasons" class="btn-icon" title="Report Reasons" style="text-decoration:none;">⚠️</a>
+                        </Authorized>
+                    </AuthorizeView>
+                    <div class="user-menu-container" @onclick="() => showUserMenu = !showUserMenu" @onblur="async () => { await Task.Delay(150); showUserMenu = false; await InvokeAsync(StateHasChanged); }" tabindex="0">
+                        <button class="btn-icon">👤</button>
+                        @if (showUserMenu)
+                        {
+                            <div class="user-dropdown">
+                                <div class="user-info">
+                                    <div class="name">@context.User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value</div>
+                                    <div class="role">@context.User.FindFirst("grade")?.Value</div>
+                                    <div class="structure">@context.User.FindFirst("structure_name")?.Value</div>
+                                </div>
+                                <div class="dropdown-divider"></div>
+                                <a href="/profile/@(context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? context.User.FindFirst("nameid")?.Value ?? context.User.FindFirst("sub")?.Value)" class="dropdown-item" style="text-decoration:none;">👤 Mon Profil</a>
+                                <button class="dropdown-item text-danger" @onclick="Logout">👋 @T["Nav_Logout"]</button>
+                            </div>
+                        }
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="login" class="btn btn-primary" style="font-size:13px;padding:6px 20px;">@T["Nav_Login"]</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </header>
+
+    <!-- Search Filter Overlay -->
+    <Client.Components.SearchFilterOverlay IsOpen="showSearch" OnClose="() => { showSearch = false; StateHasChanged(); }" />
+
+    <!-- MAIN CONTENT -->
+    <div class="content-area">
+        <div class="main-feed">
+            @Body
+        </div>
+        <aside class="right-sidebar">
+            <div class="sidebar-widget">
+                <div class="widget-header">@T["Home_About_Title"]</div>
+                <div class="widget-body">
+                    <p style="margin-bottom:12px;">@T["Home_About_Desc"]</p>
+                    <a href="create" class="btn btn-primary" style="width:100%;margin-bottom:8px;">@T["Home_About_Create"]</a>
+                    <a href="groups" class="btn btn-outline" style="width:100%;">@T["Home_About_Browse"]</a>
+                </div>
+            </div>
+            @if (sidebarGroups.Any())
+            {
+                <div class="sidebar-widget">
+                    <div class="widget-header">@T["Sidebar_TopGroups"]</div>
+                    <div class="widget-body" style="padding:8px 0;">
+                        @foreach (var g in sidebarGroups)
+                        {
+                            <div class="sidebar-group-item" style="flex-direction:column; align-items:stretch; cursor:default;">
+                                <a href="/groups/@g.Id" style="display:flex; text-decoration:none; color:inherit; align-items:center;">
+                                    <span class="sidebar-group-icon" style="display:flex;align-items:center;">
+                                        @if(!string.IsNullOrEmpty(g.IconUrl) && g.IconUrl.StartsWith("data:image"))
+                                        {
+                                            <img src="@g.IconUrl" style="width:24px;height:24px;border-radius:50%;object-fit:cover;" />
+                                        }
+                                        else
+                                        {
+                                            @(string.IsNullOrEmpty(g.IconUrl) ? "📁" : g.IconUrl)
+                                        }
+                                    </span>
+                                    <div class="sidebar-group-info">
+                                        <span class="sidebar-group-name">@g.Name</span>
+                                        <span class="sidebar-group-members">@g.MemberCount @(g.MemberCount <= 1 ? T["GroupList_Member"] : T["GroupList_Members"])</span>
+                                    </div>
+                                </a>
+                                <div style="display:flex; gap:6px; margin-top:8px;">
+                                    <button class="btn @(g.IsJoined ? "btn-outline" : "btn-primary")" style="flex:1; padding:4px 0; font-size:11px; @(g.IsJoined ? "color:var(--accent-pink); border-color:var(--accent-pink);" : "")" @onclick="() => ToggleJoin(g)">
+                                        @(g.IsJoined ? T["GroupDetail_LeaveBtn"] : T["GroupDetail_JoinBtn"])
+                                    </button>
+                                    @if(g.IsJoined)
+                                    {
+                                        <a class="btn btn-primary" href="/groups/@g.Id#group-posts" style="flex:1; padding:4px 0; font-size:11px; text-decoration:none; text-align:center;">
+                                            @T["GroupDetail_ViewPosts"]
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-primary" disabled style="flex:1; padding:4px 0; font-size:11px; text-align:center; opacity:0.5; cursor:not-allowed;">
+                                            @T["GroupDetail_ViewPosts"]
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="sidebar-widget">
+                <div class="widget-body" style="padding:12px 16px;">
+                    <p style="font-size:12px;color:var(--text-tertiary);">KnowledgeHub v1.0 © 2026</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+<style>
+    .user-menu-container {
+        position: relative;
+    }
+    
+    .user-dropdown {
+        position: absolute;
+        top: 100%;
+        inset-inline-end: 0;
+        margin-top: 8px;
+        width: 240px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow);
+        z-index: 200;
+        padding: 8px 0;
+    }
+    
+    .user-info {
+        padding: 12px 16px;
+    }
+    
+    .user-info .name {
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+    
+    .user-info .role, .user-info .structure {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+    
+    .dropdown-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 8px 0;
+    }
+    
+    .dropdown-item {
+        display: block;
+        width: 100%;
+        text-align: start;
+        padding: 10px 16px;
+        background: none;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background var(--transition);
+        font-family: var(--font);
+    }
+
+    .sidebar-group-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px;
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: background var(--transition);
+    }
+    .sidebar-group-item:hover {
+        background: var(--bg-hover);
+        text-decoration: none;
+    }
+    .sidebar-group-icon {
+        font-size: 20px;
+        width: 28px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .sidebar-group-info {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    .sidebar-group-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sidebar-group-members {
+        font-size: 11px;
+        color: var(--text-tertiary);
+    }
+    
+    .dropdown-item:hover {
+        background: var(--bg-hover);
+    }
+    
+    .text-danger {
+        color: var(--accent-pink) !important;
+    }
+</style>
+
+@code {
+    private bool showUserMenu = false;
+    private bool showSearch = false;
+    private bool isDarkMode = true;
+    private List<GroupSummaryDto> sidebarGroups = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("document.documentElement.setAttribute", "dir", T.GetDirection());
+            try
+            {
+                var savedTheme = await JS.InvokeAsync<string>("localStorage.getItem", "app_theme");
+                if (savedTheme == "light")
+                {
+                    isDarkMode = false;
+                    await JS.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", "light");
+                }
+            }
+            catch { }
+
+            try
+            {
+                var groups = await GroupService.GetGroupsAsync();
+                sidebarGroups = groups.OrderByDescending(g => g.MemberCount).Take(10).ToList();
+            }
+            catch { }
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task ToggleJoin(GroupSummaryDto g)
+    {
+        try
+        {
+            if (g.IsJoined)
+            {
+                var res = await GroupService.LeaveGroupAsync(g.Id);
+                if (res != null && res.Success) { g.IsJoined = false; g.MemberCount = Math.Max(0, g.MemberCount - 1); }
+            }
+            else
+            {
+                var res = await GroupService.JoinGroupAsync(g.Id);
+                if (res != null && res.Success) { g.IsJoined = true; g.MemberCount++; }
+            }
+            StateHasChanged();
+        }
+        catch { }
+    }
+
+    private async Task ToggleTheme()
+    {
+        isDarkMode = !isDarkMode;
+        var theme = isDarkMode ? "dark" : "light";
+        await JS.InvokeVoidAsync("localStorage.setItem", "app_theme", theme);
+
+        if (isDarkMode)
+            await JS.InvokeVoidAsync("document.documentElement.removeAttribute", "data-theme");
+        else
+            await JS.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", "light");
+    }
+
+    private async Task ChangeLanguage(string lang)
+    {
+        if (T.CurrentLang == lang) return;
+        await T.SetLanguageAsync(lang);
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+    }
+
+    private async Task Logout()
+    {
+        ((ClientLibrary.Helpers.CustomAuthStateProvider)AuthStateProvider).MarkUserAsLoggedOut();
+        await JS.InvokeVoidAsync("localStorage.removeItem", "authToken");
+        Nav.NavigateTo("login");
+    }
+}

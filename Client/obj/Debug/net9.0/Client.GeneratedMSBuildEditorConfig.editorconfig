@@ -1,0 +1,133 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = Client
+build_property.RootNamespace = Client
+build_property.ProjectDir = C:\Users\ilyas\Desktop\OurProject\Client\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\ilyas\Desktop\OurProject\Client
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/CommentSection.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xDb21tZW50U2VjdGlvbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/LazyPostDetailLoader.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXp5UG9zdERldGFpbExvYWRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostActionsMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0QWN0aW9uc01lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostTypes/NewsPost.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0VHlwZXNcTmV3c1Bvc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostTypes/ProblemPost.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0VHlwZXNcUHJvYmxlbVBvc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostTypes/QuizPost.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0VHlwZXNcUXVpelBvc3QucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostTypes/SolutionPost.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0VHlwZXNcU29sdXRpb25Qb3N0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/PostTypes/SurveyPost.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQb3N0VHlwZXNcU3VydmV5UG9zdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/ReportButton.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xSZXBvcnRCdXR0b24ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/SearchFilterOverlay.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTZWFyY2hGaWx0ZXJPdmVybGF5LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Components/StarRating.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xTdGFyUmF0aW5nLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Layout/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XEVtcHR5TGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Admin/AdminDashboard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5EYXNoYm9hcmQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Admin/AdminReporters.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5SZXBvcnRlcnMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Admin/AdminReportReasons.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRtaW5cQWRtaW5SZXBvcnRSZWFzb25zLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Auth/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aFxMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Groups/AdminGroups.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBzXEFkbWluR3JvdXBzLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Groups/GroupDetail.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBzXEdyb3VwRGV0YWlsLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Groups/GroupList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcR3JvdXBzXEdyb3VwTGlzdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Posts/CreatePost.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9zdHNcQ3JlYXRlUG9zdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Posts/PostDetails.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUG9zdHNcUG9zdERldGFpbHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Pages/Profile/Profile.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUHJvZmlsZVxQcm9maWxlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/Shared/RedirectToLogin.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFJlZGlyZWN0VG9Mb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ilyas/Desktop/OurProject/Client/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 

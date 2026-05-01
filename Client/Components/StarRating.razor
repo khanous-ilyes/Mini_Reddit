@@ -1,0 +1,74 @@
+@namespace Client.Components
+@inject ClientLibrary.Services.Implementations.IPostClientService PostService
+@inject Client.Services.ITranslationService T
+
+<div class="star-rating" @onmouseleave="ResetHover">
+    <div class="stars">
+        @for (int i = 1; i <= 5; i++)
+        {
+            var starValue = i;
+            <span class="star @(GetStarClass(starValue))"
+                  @onmouseover="() => HoverStar(starValue)"
+                  @onclick="() => RatePost(starValue)">
+                ★
+            </span>
+        }
+    </div>
+    <div style="display:flex; flex-direction:column; justify-content:center; gap:2px;">
+        @if (UserRating > 0)
+        {
+            <span class="rating-text" style="color:var(--accent-yellow);">@T["Star_You"]: @UserRating / 5</span>
+        }
+        @if (AverageRating > 0)
+        {
+            <span class="rating-text" style="font-size:11px; opacity:0.8;">@T["Star_Global"]: @AverageRating.ToString("0.0")</span>
+        }
+    </div>
+</div>
+
+<style>
+    .star-rating { display: flex; align-items: center; gap: 8px; }
+    .stars { display: flex; cursor: pointer; }
+    .star { font-size: 20px; color: var(--border-light); transition: color 0.15s; user-select: none; }
+    .star:hover { transform: scale(1.1); }
+    .star.active { color: var(--accent-yellow); }
+    .star.hovered { color: var(--accent-yellow); opacity: 0.7; }
+    .rating-text { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+</style>
+
+@code {
+    [Parameter] public Guid PostId { get; set; }
+    [Parameter] public double AverageRating { get; set; }
+    [Parameter] public int UserRating { get; set; }
+    
+    // Callback to let parent update if needed
+    [Parameter] public EventCallback<int> OnRated { get; set; }
+
+    private int hoveredStar = 0;
+
+    private void HoverStar(int rating) => hoveredStar = rating;
+    private void ResetHover() => hoveredStar = 0;
+
+    private string GetStarClass(int starValue)
+    {
+        if (hoveredStar >= starValue) return "hovered";
+        if (UserRating >= starValue) return "active";
+        return "";
+    }
+
+    private async Task RatePost(int rating)
+    {
+        if (UserRating == rating) return; 
+        UserRating = rating;
+        
+        // Optimistic update of Average
+        // We'll just invoke parent or do minimal
+        await OnRated.InvokeAsync(rating);
+        var res = await PostService.RatePostAsync(PostId, rating);
+        if (res != null && res.Success)
+        {
+            AverageRating = res.Data;
+            StateHasChanged();
+        }
+    }
+}

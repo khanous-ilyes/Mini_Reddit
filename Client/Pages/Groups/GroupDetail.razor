@@ -1,0 +1,210 @@
+@page "/groups/{Id:guid}"
+@using BaseLibrary.DTOs.Groups
+@using BaseLibrary.DTOs.Posts
+@inject ClientLibrary.Services.Implementations.IGroupClientService GroupService
+@inject ClientLibrary.Services.Implementations.IPostClientService PostService
+@inject Client.Services.ITranslationService T
+@inject NavigationManager Nav
+
+<PageTitle>@groupName - KnowledgeHub</PageTitle>
+
+@if (loading)
+{
+    <div class="loading-wrap"><div class="loader-ring"></div></div>
+}
+else if (group == null)
+{
+    <div class="post-card" style="padding:24px;text-align:center;">
+        <h2 style="margin-bottom:8px;">@T["GroupDetail_NotFound"]</h2>
+        <a href="/" class="btn btn-outline">@T["GroupDetail_BackHome"]</a>
+    </div>
+}
+else
+{
+    <!-- Group Header -->
+    <div class="post-card group-header">
+        <div class="gh-top">
+            <div class="gh-icon">
+                @if(!string.IsNullOrEmpty(group.IconUrl) && group.IconUrl.StartsWith("data:image"))
+                {
+                    <img src="@group.IconUrl" style="width:64px;height:64px;border-radius:50%;object-fit:cover;" />
+                }
+                else
+                {
+                    @(string.IsNullOrEmpty(group.IconUrl) ? "📁" : group.IconUrl)
+                }
+            </div>
+            <div class="gh-info">
+                <h1>@group.Name</h1>
+                <p>@group.Description</p>
+                <div class="gh-meta">@group.MemberCount @T["GroupDetail_Members"]</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Feed section -->
+    <h3 id="group-posts" class="section-title">@T["GroupDetail_GroupPosts"]</h3>
+    
+    @if (!group.IsJoined)
+    {
+        <div class="post-card" style="padding:24px;text-align:center;background:rgba(255,193,7,0.1);color:var(--accent-yellow);border:1px solid rgba(255,193,7,0.3);">
+            @T["GroupDetail_MustJoin"]
+        </div>
+    }
+    else if (loadingPosts)
+    {
+        <div style="text-align:center; padding:24px;"><div class="loader-ring"></div></div>
+    }
+    else if (loadedPosts.Any())
+    {
+        @foreach (var post in loadedPosts)
+        {
+            <div style="position:relative;">
+                <div style="position:absolute; top:12px; right:12px; z-index:10;">
+                    <PostActionsMenu PostId="post.Id" authorId="@post.AuthorId" IsPinned="@post.IsPinned" OnPinnedChanged="@((val) => { post.IsPinned = val; StateHasChanged(); })" OnDeleted="() => { loadedPosts.RemoveAll(p => p.Id == post.Id); StateHasChanged(); }" />
+                </div>
+                <Client.Components.LazyPostDetailLoader PostId="post.Id" TypeCode="@post.TypeCode" />
+            </div>
+        }
+
+        @if (currentPage * pageSize < totalItems)
+        {
+            <div class="load-more-container">
+                <button class="btn-load-more" disabled="@loadingPosts" @onclick="LoadNextPage">
+                    @if (loadingPosts)
+                    {
+                        <div class="loader-dots"><span>.</span><span>.</span><span>.</span></div>
+                    }
+                    else
+                    {
+                        <span>⬇️ @T["Home_LoadMore"]</span>
+                    }
+                </button>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="post-card" style="padding:24px;text-align:center;color:var(--text-secondary);">
+            @T["GroupDetail_NoPosts"]
+        </div>
+    }
+}
+
+<style>
+    .group-header { padding: 24px; margin-bottom: 24px; }
+    .gh-top { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 24px; }
+    .gh-icon { font-size: 48px; min-width: 64px; text-align: center; }
+    .gh-info h1 { font-size: 24px; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; }
+    .gh-info p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 8px; }
+    .gh-meta { font-size: 12px; font-weight: 700; color: var(--accent); background: var(--bg-hover); display: inline-block; padding: 4px 12px; border-radius: 12px; }
+    .section-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; color: var(--text-primary); }
+
+    /* Load More */
+    .load-more-container {
+        display: flex;
+        justify-content: center;
+        margin: 32px 0 64px 0;
+    }
+
+    .btn-load-more {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 12px 32px;
+        border-radius: 24px;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all var(--transition);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-load-more:hover:not(:disabled) {
+        border-color: var(--accent);
+        background: var(--bg-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-load-more:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .loader-dots span {
+        animation: blink 1.4s infinite both;
+        font-size: 20px;
+    }
+    .loader-dots span:nth-child(2) { animation-delay: .2s; }
+    .loader-dots span:nth-child(3) { animation-delay: .4s; }
+
+    @@keyframes blink {
+        0% { opacity: .2; }
+        20% { opacity: 1; }
+        100% { opacity: .2; }
+    }
+</style>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private GroupSummaryDto? group;
+    private List<PostSummaryDto> loadedPosts = new();
+    private bool loading = true;
+    private bool loadingPosts = false;
+    private string groupName = "Groupe";
+    private int currentPage = 1;
+    private int totalItems = 0;
+    private const int pageSize = 10;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loading = true;
+        var allGroups = await GroupService.GetGroupsAsync();
+        group = allGroups.FirstOrDefault(g => g.Id == Id);
+        if (group != null)
+        {
+            groupName = group.Name;
+            await LoadPosts(reset: true);
+        }
+        loading = false;
+    }
+
+    private async Task LoadPosts(bool reset = false)
+    {
+        if (reset)
+        {
+            currentPage = 1;
+            loadedPosts.Clear();
+        }
+
+        loadingPosts = true;
+        StateHasChanged();
+        
+        var res = await PostService.GetFeedAsync(Id, currentPage, pageSize);
+        if (res != null)
+        {
+            if (reset)
+                loadedPosts = res.Data.ToList();
+            else
+                loadedPosts.AddRange(res.Data);
+
+            totalItems = res.Total;
+        }
+
+        loadingPosts = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadNextPage()
+    {
+        if (loadingPosts || currentPage * pageSize >= totalItems) return;
+        currentPage++;
+        await LoadPosts(reset: false);
+    }
+}

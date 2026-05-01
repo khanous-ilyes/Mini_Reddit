@@ -1,0 +1,15 @@
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\bin\Debug\net8.0\ServerLibrary.deps.json
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\bin\Debug\net8.0\ServerLibrary.dll
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\bin\Debug\net8.0\ServerLibrary.pdb
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\bin\Debug\net8.0\BaseLibrary.dll
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\bin\Debug\net8.0\BaseLibrary.pdb
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.csproj.AssemblyReference.cache
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.AssemblyInfoInputs.cache
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.AssemblyInfo.cs
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.csproj.CoreCompileInputs.cache
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLi.AF94C59E.Up2Date
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.dll
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\refint\ServerLibrary.dll
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ServerLibrary.pdb
+C:\Users\ilyas\Desktop\OurProject\ServerLibrary\obj\Debug\net8.0\ref\ServerLibrary.dll

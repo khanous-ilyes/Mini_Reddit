@@ -1,0 +1,28 @@
+﻿<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin />
+                    }
+                    else
+                    {
+                        <p style="color:var(--text-secondary);padding:24px;">Accès non autorisé.</p>
+                    }
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>404</PageTitle>
+            <LayoutView Layout="@typeof(Layout.MainLayout)">
+                <div style="text-align:center;padding:80px 20px;color:var(--text-secondary);">
+                    <h1 style="font-size:48px;margin-bottom:12px;color:var(--text-primary);">404</h1>
+                    <p>Cette page n'existe pas.</p>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

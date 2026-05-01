@@ -1,0 +1,37 @@
+@namespace Client.Components
+@inject Client.Services.ITranslationService T
+
+@if (postDetail == null)
+{
+    <!-- Skeleton card -->
+    <div class="post-card" style="padding:16px;">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-line" style="width:90%;"></div>
+        <div class="skeleton skeleton-line" style="width:75%;"></div>
+        <div class="skeleton skeleton-sm" style="margin-top:12px;"></div>
+    </div>
+}
+else
+{
+    @if (TypeCode == "SOLUTION") { <SolutionPost Post="postDetail" /> }
+    else if (TypeCode == "PROBLEM") { <ProblemPost Post="postDetail" /> }
+    else if (TypeCode == "NEWS") { <NewsPost Post="postDetail" /> }
+    else if (TypeCode == "QUIZ") { <QuizPost Post="postDetail" /> }
+    else if (TypeCode == "SURVEY") { <SurveyPost Post="postDetail" /> }
+    else { <div class="post-card" style="padding:16px;"><p style="color:var(--text-secondary);">@T["PostType_Unsupported"] @TypeCode</p></div> }
+}
+
+@code {
+    [Parameter] public Guid PostId { get; set; }
+    [Parameter] public string TypeCode { get; set; } = string.Empty;
+
+    [Inject] IPostClientService PostService { get; set; } = default!;
+
+    private PostDetailDto? postDetail;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var res = await PostService.GetPostDetailAsync(PostId);
+        postDetail = res?.Data;
+    }
+}

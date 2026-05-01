@@ -1,0 +1,233 @@
+@page "/profile/{UserId}"
+@attribute [Authorize]
+@inject IProfileClientService ProfileService
+@inject Client.Services.ITranslationService T
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>@(profile?.FullName ?? T["Profile_Title"]) — KnowledgeHub</PageTitle>
+
+@if (loading)
+{
+    <div class="post-card" style="padding:40px;text-align:center;">
+        <span class="loader-ring"></span>
+    </div>
+}
+else if (profile == null)
+{
+    <div class="post-card" style="padding:24px;text-align:center;color:var(--text-secondary);">
+        @T["Profile_NotFound"]
+    </div>
+}
+else
+{
+    <!-- Profile Header Card -->
+    <div class="prof-card">
+        <div class="prof-banner"></div>
+        <div class="prof-main">
+            <div class="prof-avatar">@(profile.FullName.Length > 0 ? profile.FullName[0].ToString().ToUpper() : "?")</div>
+            <div class="prof-identity">
+                <h1 class="prof-name">@profile.FullName</h1>
+                <div class="prof-grade">@profile.Grade</div>
+                <div class="prof-structure">🏢 @profile.Structure</div>
+            </div>
+            @if (isOwnProfile && !isEditing)
+            {
+                <button class="btn btn-outline" style="margin-left:auto; padding:6px 12px; font-size:12px;" @onclick="StartEditing">
+                    <i class="oi oi-pencil" style="margin-right:4px;"></i> Éditer
+                </button>
+            }
+        </div>
+        
+        @if (isEditing)
+        {
+            <div style="padding: 16px; border-top: 1px solid var(--border); background: var(--bg-hover);">
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Bio</label>
+                    <textarea class="form-control" @bind="editBio" style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 8px; width: 100%; min-height: 60px;"></textarea>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Téléphone</label>
+                    <input class="form-control" @bind="editPhone" style="background: var(--bg-elevated); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; padding: 8px; width: 100%;" />
+                </div>
+                <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" @onclick="CancelEditing" disabled="@saving">Annuler</button>
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" @onclick="SaveProfile" disabled="@saving">
+                        @if (saving) { <span class="loader-ring" style="width: 14px; height: 14px; border-width: 2px;"></span> } else { <span>Sauvegarder</span> }
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(profile.Bio))
+            {
+                <div class="prof-bio">@profile.Bio</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(profile.Telephone))
+            {
+                <div class="prof-contact">📞 @profile.Telephone</div>
+            }
+        }
+        
+        <div class="prof-stats">
+            <div class="stat">
+                <span class="stat-val">@profile.TotalPosts</span>
+                <span class="stat-lbl">@T["Profile_Posts"]</span>
+            </div>
+            <div class="stat">
+                <span class="stat-val">@profile.TotalSolutions</span>
+                <span class="stat-lbl">@T["Profile_Solutions"]</span>
+            </div>
+            <div class="stat">
+                <span class="stat-val">@profile.TotalProblems</span>
+                <span class="stat-lbl">@T["Profile_Problems"]</span>
+            </div>
+            <div class="stat">
+                <span class="stat-val">@profile.TotalViews</span>
+                <span class="stat-lbl">@T["Profile_Views"]</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Posts -->
+    <div class="prof-section-title">@T["Profile_RecentPosts"]</div>
+    @if (profile.RecentPosts.Any())
+    {
+        @foreach (var post in profile.RecentPosts)
+        {
+            <div class="post-card prof-post clickable" @onclick='() => Nav.NavigateTo($"/posts/{post.Id}/{post.TypeCode}")'>
+                <div class="post-body-col" style="padding:10px 14px; position:relative;">
+                    <div style="position:absolute; right:8px; top:8px;">
+                        <PostActionsMenu PostId="post.Id" authorId="@post.AuthorId" IsPinned="@post.IsPinned" OnPinnedChanged="@((val) => { post.IsPinned = val; StateHasChanged(); })" OnDeleted="() => profile.RecentPosts.Remove(post)" />
+                    </div>
+                    <div class="post-meta">
+                        <span class="badge @GetBadgeClass(post.TypeCode)">@GetBadgeLabel(post.TypeCode)</span>
+                        <span>· @FormatTime(post.CreatedAt)</span>
+                    </div>
+                    <div class="post-title" style="font-size:15px;margin-bottom:4px; padding-inline-end: 24px;">
+                        @if(post.IsPinned) { <span title="Épinglé">📌 </span> }@post.Title
+                    </div>
+                    <div style="display:flex;gap:12px;font-size:11px;color:var(--text-tertiary);">
+                        <span>👁 @post.ViewsCount @T["Action_Views"]</span>
+                        <span>💬 @post.CommentsCount @T["Action_Comments"]</span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="post-card" style="padding:16px;text-align:center;color:var(--text-secondary);font-size:13px;">
+            @T["Profile_NoPosts"]
+        </div>
+    }
+}
+
+<style>
+    .prof-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:16px;overflow:hidden;}
+    .prof-banner{height:80px;background:linear-gradient(135deg,#ff4500 0%,#ff6b35 50%,#f59e0b 100%);}
+    .prof-main{display:flex;align-items:flex-end;gap:14px;padding:0 16px;margin-top:-28px;}
+    .prof-avatar{width:56px;height:56px;border-radius:50%;background:var(--bg-elevated);border:3px solid var(--bg-card);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--accent);flex-shrink:0;}
+    .prof-identity{padding-bottom:8px;min-width:0;}
+    .prof-name{font-size:18px;font-weight:700;color:var(--text-primary);margin:0;line-height:1.2;}
+    .prof-grade{font-size:12px;color:var(--accent-blue);font-weight:600;}
+    .prof-structure{font-size:11px;color:var(--text-tertiary);}
+    .prof-bio{padding:8px 16px;font-size:13px;color:var(--text-secondary);line-height:1.5;border-top:1px solid var(--border);}
+    .prof-contact{padding:6px 16px;font-size:12px;color:var(--text-secondary);}
+    .prof-stats{display:flex;border-top:1px solid var(--border);}
+    .stat{flex:1;text-align:center;padding:10px 0;border-inline-end:1px solid var(--border);}
+    .stat:last-child{border-inline-end:none;}
+    .stat-val{display:block;font-size:16px;font-weight:800;color:var(--text-primary);}
+    .stat-lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-tertiary);font-weight:600;}
+    .prof-section-title{font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;padding-inline-start:4px;}
+    .prof-post{cursor:default;}
+    .prof-post.clickable { cursor: pointer; }
+    .prof-post:hover{border-color:var(--accent); background: var(--bg-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); transition: all var(--transition); }
+</style>
+
+@code {
+    [Parameter] public string UserId { get; set; } = "";
+
+    private UserProfileDto? profile;
+    private bool loading = true;
+    private bool isOwnProfile = false;
+    private bool isEditing = false;
+    private bool saving = false;
+    
+    private string editBio = "";
+    private string editPhone = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var currentUserId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                         ?? authState.User.FindFirst("nameid")?.Value 
+                         ?? authState.User.FindFirst("sub")?.Value;
+        isOwnProfile = currentUserId == UserId;
+
+        loading = true;
+        var res = await ProfileService.GetProfileAsync(UserId);
+        if (res is { Success: true, Data: not null })
+            profile = res.Data;
+        loading = false;
+    }
+
+    private void StartEditing()
+    {
+        editBio = profile?.Bio ?? "";
+        editPhone = profile?.Telephone ?? "";
+        isEditing = true;
+    }
+
+    private void CancelEditing()
+    {
+        isEditing = false;
+    }
+
+    private async Task SaveProfile()
+    {
+        saving = true;
+        var req = new BaseLibrary.DTOs.UpdateProfileDto { Bio = editBio, Telephone = editPhone };
+        var res = await ProfileService.UpdateProfileAsync(req);
+        if (res is { Success: true })
+        {
+            if (profile != null)
+            {
+                profile.Bio = editBio;
+                profile.Telephone = editPhone;
+            }
+            isEditing = false;
+        }
+        saving = false;
+    }
+
+    private string GetBadgeClass(string type) => type switch
+    {
+        "SOLUTION" => "badge-solution",
+        "PROBLEM" => "badge-problem",
+        "NEWS" => "badge-news",
+        "QUIZ" => "badge-quiz",
+        "SURVEY" => "badge-survey",
+        _ => ""
+    };
+
+    private string GetBadgeLabel(string type) => type switch
+    {
+        "SOLUTION" => T["Solution_Badge"],
+        "PROBLEM" => T["Problem_Badge"],
+        "NEWS" => T["News_Badge"],
+        "QUIZ" => T["Quiz_Badge"],
+        "SURVEY" => T["Survey_Badge"],
+        _ => type
+    };
+
+    private string FormatTime(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 60) return T["Time_MinsAgo"].Replace("{0}", ((int)diff.TotalMinutes).ToString());
+        if (diff.TotalHours < 24) return T["Time_HoursAgo"].Replace("{0}", ((int)diff.TotalHours).ToString());
+        if (diff.TotalDays < 30) return T["Time_DaysAgo"].Replace("{0}", ((int)diff.TotalDays).ToString());
+        return T["Time_Date"].Replace("{0}", dt.ToString("dd/MM/yyyy"));
+    }
+}

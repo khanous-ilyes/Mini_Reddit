@@ -1,0 +1,84 @@
+@page "/posts/{Id:guid}/{TypeCode}"
+@attribute [Authorize]
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@using Client.Components
+
+<div class="detail-page-container">
+    <div class="detail-header">
+        <button class="btn-back" @onclick="GoBack">
+            ← @T["Action_Cancel"]
+        </button>
+        <h2 class="detail-page-title">Détails du Poste</h2>
+    </div>
+
+    <div class="detail-content">
+        <LazyPostDetailLoader PostId="Id" TypeCode="@TypeCode" />
+    </div>
+</div>
+
+<style>
+    .detail-page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-bottom: 80px;
+    }
+    
+    .detail-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 0 4px;
+    }
+
+    .btn-back {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: flex;
+        align-items: center;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-back:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        transform: translateX(-4px);
+        background: var(--bg-hover);
+    }
+
+    .detail-page-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .detail-content {
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    [Parameter] public string TypeCode { get; set; } = string.Empty;
+
+    [Inject] Client.Services.ITranslationService T { get; set; } = default!;
+
+    private async Task GoBack()
+    {
+        await JS.InvokeVoidAsync("history.back");
+    }
+}
