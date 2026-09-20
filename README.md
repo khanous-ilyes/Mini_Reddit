@@ -1,71 +1,71 @@
 # 🧠 KnowledgeHub (Mini-Reddit)
 
-Une plateforme complète et moderne agissant comme un **Mini-Reddit**, conçue pour favoriser la collaboration, l'échange de connaissances et la résolution de problèmes au sein d'une organisation. 
+A complete and modern platform acting as a **Mini-Reddit**, designed to foster collaboration, knowledge sharing, and problem-solving within an organization.
 
-![KnowledgeHub Logo](./Client/wwwroot/images/logo-reddit.png) <!-- Adaptez le chemin vers votre logo si nécessaire -->
+![KnowledgeHub Logo](./Client/wwwroot/images/logo-reddit.png) <!-- Adjust the path to your logo if necessary -->
 
-## ✨ Fonctionnalités Principales
+## ✨ Key Features
 
-### 👥 Côté Utilisateur
-*   **Diversité des contenus :** Partagez vos connaissances via différents types de postes interactifs :
-    *   **Problèmes (Questions) & Solutions :** Posez des questions et proposez des solutions validées.
-    *   **News :** Partagez les actualités importantes (avec support d'upload d'images).
-    *   **Quiz & Sondages (Surveys) :** Testez les connaissances et recueillez les avis de la communauté.
-*   **Système d'Engagement (Gamification) :** 
-    *   Commentez, interagissez et participez aux discussions.
-    *   Notez (Star Rating) les meilleurs contenus.
-*   **Groupes de discussion :** Rejoignez des groupes spécifiques pour filtrer votre flux d'actualité et ne voir que le contenu pertinent (Confidentialité de recherche intégrée).
-*   **Profils Personnalisables :** Éditez votre biographie, ajoutez vos informations de contact, et gardez un suivi précis de vos contributions.
-*   **Support Multilingue :** Interface entièrement traduite et basculable instantanément entre l'**Arabe (RTL)** et le **Français (LTR)**.
-*   **Interface "Glassmorphism" Premium :** Un design sombre, ultra-moderne et fluide avec des animations soignées pour une expérience utilisateur (UX) optimale.
+### 👥 User Features
+*   **Diverse Content:** Share your knowledge through various interactive post types:
+    *   **Problems (Questions) & Solutions:** Ask questions and propose validated solutions.
+    *   **News:** Share important updates (with image upload support).
+    *   **Quizzes & Surveys:** Test knowledge and gather community feedback.
+*   **Engagement System (Gamification):**
+    *   Comment, interact, and participate in discussions.
+    *   Rate the best content (Star Rating).
+*   **Discussion Groups:** Join specific groups to filter your news feed and only see relevant content (Integrated search privacy).
+*   **Customizable Profiles:** Edit your biography, add contact information, and keep a precise track of your contributions.
+*   **Multilingual Support:** Fully translated interface, instantly switchable between **Arabic (RTL)** and **French (LTR)**.
+*   **Premium "Glassmorphism" Interface:** A dark, ultra-modern, and fluid design with polished animations for an optimal User Experience (UX).
 
-### 🛡️ Côté Administrateur (SuperAdmin & Modérateurs)
-*   **Dashboard Analytics (Statistiques) :** Un tableau de bord complet affichant les indicateurs clés (KPIs) en temps réel (Nombre total de postes, utilisateurs inscrits, volume de commentaires).
-*   **Classements & Détection :** 
-    *   Identifier les meilleurs contributeurs (Top Ratings, Champions Solutions).
-    *   Détecter automatiquement les comportements problématiques (Auteurs mal notés, signalements abusifs).
-*   **Modération Avancée :** Gestion des signalements (Reports) pour garder la plateforme saine.
-*   **Épinglage (Pin Posts) :** Mettez en avant les annonces cruciales et les actualités stratégiques en les épinglant tout en haut du flux d'actualité.
-*   **Gestion des Groupes et Contenus :** Création et administration complète des groupes et des droits.
+### 🛡️ Administrator Features (SuperAdmin & Moderators)
+*   **Analytics Dashboard:** A comprehensive dashboard displaying real-time Key Performance Indicators (KPIs) (Total posts, registered users, comment volume).
+*   **Rankings & Detection:**
+    *   Identify top contributors (Top Ratings, Solutions Champions).
+    *   Automatically detect problematic behavior (Poorly rated authors, abusive reports).
+*   **Advanced Moderation:** Manage reports to keep the platform healthy.
+*   **Pin Posts:** Highlight crucial announcements and strategic news by pinning them to the top of the news feed.
+*   **Group and Content Management:** Full creation and administration of groups and permissions.
 
-## 🛠️ Stack Technique
+## 🛠️ Technical Stack
 
-*   **Frontend :** [Blazor WebAssembly](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) (C# / .NET 8)
-*   **Backend :** ASP.NET Core 8 Web API
-*   **Base de données :** SQLite (via Entity Framework Core)
-*   **Architecture :** Solution Clean Architecture séparée en projets multiples (`Client`, `Server`, `BaseLibrary`, `ServerLibrary`, `ClientLibrary`).
+*   **Frontend:** [Blazor WebAssembly](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) (C# / .NET 8)
+*   **Backend:** ASP.NET Core 8 Web API
+*   **Database:** SQLite (via Entity Framework Core)
+*   **Architecture:** Clean Architecture solution separated into multiple projects (`Client`, `Server`, `BaseLibrary`, `ServerLibrary`, `ClientLibrary`).
 
-## 🚀 Installation et Lancement
+## 🚀 Installation and Launch
 
-### Prérequis
-*   [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installé sur votre machine.
+### Prerequisites
+*   [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your machine.
 
-### Étapes pour lancer le projet localement
-1.  **Cloner le dépôt :**
+### Steps to run the project locally
+1.  **Clone the repository:**
     ```bash
-    git clone <votre-url-github>
+    git clone <your-github-url>
     cd OurProject
     ```
 
-2.  **Lancer le Serveur (Backend & Base de données) :**
-    La base de données SQLite se créera automatiquement au premier lancement (via les migrations EF Core).
+2.  **Run the Server (Backend & Database):**
+    The SQLite database will be created automatically on the first launch (via EF Core migrations).
     ```bash
     cd Server
     dotnet run
     ```
 
-3.  **Lancer le Client (Frontend Blazor) :**
-    Ouvrez un nouveau terminal et lancez le client.
+3.  **Run the Client (Blazor Frontend):**
+    Open a new terminal and run the client.
     ```bash
     cd Client
     dotnet run
     ```
-4.  Ouvrez votre navigateur sur l'adresse indiquée par le terminal du `Client` (ex: `http://localhost:5168` ou l'adresse configurée).
+4.  Open your browser to the address indicated by the `Client` terminal (e.g., `http://localhost:5168` or the configured address).
 
-## 💡 Perspectives (Roadmap future)
-*   **Système de Recommandation IA :** Suggérer des posts pertinents basés sur l'historique utilisateur.
-*   **Notifications en Temps Réel :** Intégration de SignalR pour des alertes instantanées (nouveaux commentaires, mentions).
-*   **Assistant IA Intégré :** Résumer de longs fils de discussion ou suggérer des solutions automatiques.
+## 💡 Perspectives (Future Roadmap)
+*   **AI Recommendation System:** Suggest relevant posts based on user history.
+*   **Real-time Notifications:** SignalR integration for instant alerts (new comments, mentions).
+*   **Integrated AI Assistant:** Summarize long discussion threads or automatically suggest solutions.
 
 ---
-*Développé avec passion pour l'échange de connaissances.*
+*Developed with passion for knowledge exchange.*
